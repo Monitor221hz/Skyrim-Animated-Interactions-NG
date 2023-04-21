@@ -13,7 +13,7 @@ namespace InteractiveIdles
             } 
             void GetIdleRecords()
             {
-                std::string pluginName = "Interactive Idles.esp";
+                std::string pluginName = "Animated Interactions.esp";
 
                 // IdleHandsBehindBack =  RE::TESForm::LookupByID<RE::TESIdleForm>(0x5902);
                 // IdleSearchChest =  RE::TESForm::LookupByID<RE::TESIdleForm>(0x5900);

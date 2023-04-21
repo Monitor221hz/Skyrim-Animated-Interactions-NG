@@ -26,7 +26,7 @@ endif()
 # To do this automatically, set the `SKYRIM_MODS_FOLDER` environment variable
 # to the path of your "mods" folder
 if(DEFINED ENV{SKYRIM_MODS_FOLDER} AND IS_DIRECTORY "$ENV{SKYRIM_MODS_FOLDER}")
-    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/Interactive Animations SKSE")
+    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/Animated Interactions SKSE")
 endif()
 
 # Otherwise, you can set OUTPUT_FOLDER to any place you'd like :)
