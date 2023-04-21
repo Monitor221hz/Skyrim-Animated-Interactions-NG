@@ -20,6 +20,7 @@ namespace InteractiveIdles
                     if (refr)
                     {
                         RE::FormType formType = refr.get()->GetBaseObject()->GetFormType();
+                        InteractiveIdles::AnimPlayer::GetSingleton()->ApplyAnimationSpeed(RE::PlayerCharacter::GetSingleton());
                         SKSE::log::info("Container Menu Target Form Type: {}", formType);
                         switch (formType)
                         {

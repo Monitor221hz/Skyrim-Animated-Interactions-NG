@@ -13,6 +13,8 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	case SKSE::MessagingInterface::kDataLoaded:
 	    
 		InteractiveIdles::AnimPlayer::GetSingleton()->GetIdleRecords();
+		Settings::GetSingleton()->LoadSettings();
+		
 		break;
 	case SKSE::MessagingInterface::kPostLoad:
 		break;

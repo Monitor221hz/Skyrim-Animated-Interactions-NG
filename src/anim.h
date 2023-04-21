@@ -1,11 +1,13 @@
+#pragma once
 #include "util.cpp"
+#include "settings.cpp"
 
 namespace InteractiveIdles
 {
     class AnimPlayer
     {
         public:
-
+            
             static AnimPlayer *GetSingleton()
             {
                 static AnimPlayer singleton;
@@ -26,8 +28,10 @@ namespace InteractiveIdles
 
 
                 IdleUseDoor = FormUtil::Form::GetFormFromMod(pluginName, 0xFB04)->As<RE::TESIdleForm>();
+
                 IdlePickUp = FormUtil::Form::GetFormFromMod(pluginName, 0xFB05)->As<RE::TESIdleForm>();
                 IdlePickUpLow = FormUtil::Form::GetFormFromMod(pluginName, 0xFB06)->As<RE::TESIdleForm>();
+                IdleTake = FormUtil::Form::GetFormFromMod(pluginName, 0x19D08)->As<RE::TESIdleForm>();
                 IdleLockPick = FormUtil::Form::GetFormFromMod(pluginName, 0xFB07)->As<RE::TESIdleForm>();
                 //0xb240a
                 
@@ -42,7 +46,7 @@ namespace InteractiveIdles
             }
         
 
-
+        
         void ExitAnimation(RE::Actor* actor)
         {
             AnimUtil::Idle::Play(IdleStop, actor, RE::DEFAULT_OBJECT::kActionIdle, nullptr);
@@ -75,15 +79,23 @@ namespace InteractiveIdles
         {
             AnimUtil::Idle::Play(IdleLockPick, actor, RE::DEFAULT_OBJECT::kActionIdle, nullptr);
         }
+        void PlayTake(RE::Actor* actor)
+        {
+            AnimUtil::Idle::Play(IdleTake, actor, RE::DEFAULT_OBJECT::kActionIdle, nullptr);
+        }
 
-
-        
+        void ApplyAnimationSpeed(RE::Actor *actor)
+        {
+            actor->SetGraphVariableFloat("II_AnimationSpeed", Settings::GetSingleton()->GetAnimationSpeed());
+        }
 
         private:
 
+            
 
 
             RE::TESIdleForm *IdleLockPick;
+            RE::TESIdleForm *IdleTake;
             RE::TESIdleForm *IdlePickUp;
             RE::TESIdleForm *IdlePickUpLow;
             RE::TESIdleForm *IdleUseDoor;

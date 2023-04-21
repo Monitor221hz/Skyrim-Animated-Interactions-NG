@@ -1,5 +1,4 @@
 #pragma once
-
 namespace PerkUtil {
     struct EntryVisitor : public RE::PerkEntryVisitor {
     public:
@@ -34,7 +33,6 @@ namespace AnimUtil
 {
     struct Idle
     {
-        public:
             static bool Play(RE::TESIdleForm* idle, RE::Actor* actor, RE::DEFAULT_OBJECT action, RE::Actor* target)
             {
             if (actor && actor->GetActorRuntimeData().currentProcess)
@@ -52,7 +50,6 @@ namespace FormUtil
 {
     struct Form
     {
-        public:
             static RE::TESForm *GetFormFromMod(std::string modname, uint32_t formid)
             {
             if (!modname.length() || !formid)
@@ -87,5 +84,84 @@ namespace FormUtil
             return RE::TESForm::LookupByID(id);
             }
     };
+}
+namespace NifUtil
+{
+    struct Node
+		{
+			static RE::NiAVObject* GetNiObject(
+				RE::NiNode*              a_root,
+				const RE::BSFixedString& a_name)
+			{
+				return a_root->GetObjectByName(a_name);
+			}
+
+			static void AttachToNode(
+				RE::NiAVObject* a_object,
+				RE::NiNode*     a_node)
+			{
+				if (a_object->parent != a_node)
+				{
+					a_node->AttachChild(a_object, true);
+				}
+			}
+
+		};
+    struct Armature
+    {
+        static RE::NiNode* GetActorNode(RE::Actor* actor, std::string nodeName)
+        {
+                auto root = actor->Get3D();
+                if (!root) return nullptr;
+
+                auto bone = root->GetObjectByName(nodeName);
+                if (!bone) return nullptr;
+
+                auto node = bone->AsNode();
+                if (!node) return nullptr;
+
+                return node;
+        }
+
+        static void AttachToNode(RE::NiAVObject* obj, RE::Actor* actor, std::string nodeName)
+        {
+            auto* node = GetActorNode(actor, nodeName);
+            if (node)
+            {
+                node->AttachChild(obj, true);
+                SKSE::log::info("Object Attached");
+            }
+        }
+    };
+    struct Collision
+    {
+        static bool ToggleMeshCollision(RE::NiAVObject* root,RE::bhkWorld* world, bool collisionState)
+        {
+            constexpr auto no_collision_flag = static_cast<std::uint32_t>(RE::CFilter::Flag::kNoCollision);
+					if (root && world) {
+						
+							RE::BSWriteLockGuard locker(world->worldLock);
+
+							RE::BSVisit::TraverseScenegraphCollision(root, [&](RE::bhkNiCollisionObject* a_col) -> RE::BSVisit::BSVisitControl {
+								if (auto hkpBody = a_col->body ? static_cast<RE::hkpWorldObject*>(a_col->body->referencedObject.get()) : nullptr; hkpBody) {
+									auto& filter = hkpBody->collidable.broadPhaseHandle.collisionFilterInfo;
+									if (!collisionState) {
+										filter |= no_collision_flag;
+									} else {
+										filter &= ~no_collision_flag;
+									}
+								}
+								return RE::BSVisit::BSVisitControl::kContinue;
+							});
+					}
+                    else 
+                    {
+                        return false;
+                    }
+            return true;
+        }
+    };
+
+   
 }
 

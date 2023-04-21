@@ -1,3 +1,4 @@
+#pragma once
 namespace InteractiveIdles
 {
     //if ((menu->menuFlags & static_cast<Flag>(MenuFlagEx::kUnpaused)) != Flag::kNone)
