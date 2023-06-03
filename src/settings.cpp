@@ -1,8 +1,11 @@
 #pragma once
 
 #include "SimpleIni.h"
-
-
+#include "takedata.h"
+#include "util.cpp"
+using namespace RE; 
+namespace AnimatedInteractions
+{
 class Settings
 {
 public:
@@ -15,7 +18,9 @@ public:
 
 	struct Animation
     {
-        float AnimationSpeed = 1.0;
+        double AnimationSpeed = 1.0;
+		double HighThreshold = -35.0;
+		double LowThreshold = -115.0;
 
     };
 
@@ -27,8 +32,27 @@ public:
 		
 		ini.LoadFile(path);
 		animation.AnimationSpeed= ini.GetDoubleValue("Animation", "AnimationSpeedMultiplier", 1.0);
+		animation.HighThreshold = ini.GetDoubleValue("Animation", "TakeHighThreshold", 50.0);
+		animation.LowThreshold = ini.GetDoubleValue("Animation", "TakeLowThreshold", -50.0);
 
         SKSE::log::info("Settings loaded. Animation speed {} ", animation.AnimationSpeed);
+		std::list<CSimpleIniA::Entry> Sections;
+		ini.GetAllSections(Sections);
+
+		auto AnimObjSection = ini.GetSection("AnimObjects"); 
+
+		for(auto& [key, entry] : *AnimObjSection)
+		{
+			auto* keyForm = FormUtil::Form::GetFormFromConfigString(key.pItem); 
+			auto* entryForm = FormUtil::Form::GetFormFromConfigString(entry); 
+
+			if ((!keyForm) || (!entryForm) || (entryForm->GetFormType() != FormType::AnimatedObject)) {continue;} 
+			TakeData::AddFormMapping(keyForm, entryForm->As<TESObjectANIO>()); 
+		}
+
+		
+
+		
 		// weather.SnowVisionAngleDegrees = ini.GetLongValue("Weather", "SnowVisionAngleDegrees");
 		// weather.RainSoundLevelMultiplier = ini.GetLongValue("Weather", "RainSoundLevelMultiplier");
 		
@@ -49,7 +73,9 @@ public:
 		// smoothCam.mode = ini.GetLongValue("SmoothCam", "Mode");
 	
 	}
-    [[nodiscard]] float GetAnimationSpeed() const { return animation.AnimationSpeed; }
+    [[nodiscard]] double GetAnimationSpeed() const { return animation.AnimationSpeed; }
+	[[nodiscard]] double GetHighTakeBound() const { return animation.HighThreshold; }
+	[[nodiscard]] double GetLowTakeBound() const { return animation.LowThreshold; }
 	// [[nodiscard]] int GetCrosshairMode() const { return crosshair.mode; }
 
 
@@ -75,3 +101,4 @@ private:
 	
 
 };
+}

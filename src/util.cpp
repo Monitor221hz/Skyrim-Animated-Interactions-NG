@@ -1,4 +1,123 @@
 #pragma once
+
+
+
+using namespace RE;
+
+namespace PointerUtil //yoinked po3's code
+{
+template <class T, class U>
+inline auto adjust_pointer(U* a_ptr, std::ptrdiff_t a_adjust) noexcept
+{
+	auto addr = a_ptr ? reinterpret_cast<std::uintptr_t>(a_ptr) + a_adjust : 0;
+	if constexpr (std::is_const_v<U> && std::is_volatile_v<U>) {
+		return reinterpret_cast<std::add_cv_t<T>*>(addr);
+	} else if constexpr (std::is_const_v<U>) {
+		return reinterpret_cast<std::add_const_t<T>*>(addr);
+	} else if constexpr (std::is_volatile_v<U>) {
+		return reinterpret_cast<std::add_volatile_t<T>*>(addr);
+	} else {
+		return reinterpret_cast<T*>(addr);
+	}
+}
+}
+
+
+namespace KeyUtil 
+{
+
+    enum class MACRO_LIMITS {
+        kMaxMacros = 282
+    };
+
+    enum class KBM_OFFSETS {
+		// first 256 for keyboard, then 8 mouse buttons, then mouse wheel up, wheel down, then 16 gamepad buttons
+		kMacro_KeyboardOffset = 0,		// not actually used, just for self-documentation
+		kMacro_NumKeyboardKeys = 256,
+
+		kMacro_MouseButtonOffset = kMacro_NumKeyboardKeys,	// 256
+		kMacro_NumMouseButtons = 8,
+
+		kMacro_MouseWheelOffset = kMacro_MouseButtonOffset + kMacro_NumMouseButtons,	// 264
+		kMacro_MouseWheelDirections = 2,
+
+		kMacro_GamepadOffset = kMacro_MouseWheelOffset + kMacro_MouseWheelDirections,	// 266
+		kMacro_NumGamepadButtons = 16,
+
+			// 282
+	};
+
+	enum class GAMEPAD_OFFSETS {
+		kGamepadButtonOffset_DPAD_UP = static_cast<int>(KBM_OFFSETS::kMacro_GamepadOffset),	// 266
+		kGamepadButtonOffset_DPAD_DOWN,
+		kGamepadButtonOffset_DPAD_LEFT,
+		kGamepadButtonOffset_DPAD_RIGHT,
+		kGamepadButtonOffset_START,
+		kGamepadButtonOffset_BACK,
+		kGamepadButtonOffset_LEFT_THUMB,
+		kGamepadButtonOffset_RIGHT_THUMB,
+		kGamepadButtonOffset_LEFT_SHOULDER,
+		kGamepadButtonOffset_RIGHT_SHOULDER,
+		kGamepadButtonOffset_A,
+		kGamepadButtonOffset_B,
+		kGamepadButtonOffset_X,
+		kGamepadButtonOffset_Y,
+		kGamepadButtonOffset_LT,
+		kGamepadButtonOffset_RT	// 281
+	};
+
+
+    struct Interpreter
+    {
+        public: 
+        static uint32_t GamepadMaskToKeycode(uint32_t keyMask) {
+	switch (keyMask) {
+		case 0x001:		return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_DPAD_UP);
+		case 0x002:		return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_DPAD_DOWN);
+		case 0x004:		return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_DPAD_LEFT);
+		case 0x008:		return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_DPAD_RIGHT);
+		case 0x0010:			return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_START);
+		case 0x0020:			return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_BACK);
+		case 0x0040:		return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_LEFT_THUMB);
+		case 0x0080:	return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_RIGHT_THUMB);
+		case 0x0100:	return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_LEFT_SHOULDER);
+		case 0x0200: return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_RIGHT_SHOULDER);
+		case 0x1000:				return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_A);
+		case 0x2000:				return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_B);
+		case 0x4000:				return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_X);
+		case 0x8000:				return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_Y);
+		case 0x9:							return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_LT);
+		case 0xA:							return static_cast<int>(GAMEPAD_OFFSETS::kGamepadButtonOffset_RT);
+		default:							return 282; // Invalid
+	}
+}
+
+    };
+
+}
+
+namespace Util
+{
+    struct String
+    {
+static std::string SplitString(const std::string str, const std::string delimiter, std::string &remainder)
+{
+    std::string ret;
+    size_t i = str.find(delimiter);
+    if (i == std::string::npos)
+    {
+        ret = str;
+        remainder = "";
+        return ret;
+    }
+
+    ret = str.substr(0, i);
+    remainder = str.substr(i + 1);
+    return ret;
+}
+    };
+
+}
 namespace PerkUtil {
     struct EntryVisitor : public RE::PerkEntryVisitor {
     public:
@@ -9,7 +128,7 @@ namespace PerkUtil {
 
         ReturnType Visit(RE::BGSPerkEntry* perk_entry) override {
             const auto* entry_point = static_cast<RE::BGSEntryPointPerkEntry*>(perk_entry);
-            const auto* perk = entry_point->perk;
+            // const auto* perk = entry_point->perk;
             
             if (entry_point->functionData &&
                 entry_point->entryData.function == RE::BGSEntryPointPerkEntry::EntryData::Function::kMultiplyValue) {
@@ -82,6 +201,18 @@ namespace FormUtil
                 }
             }
             return RE::TESForm::LookupByID(id);
+            }
+
+            static TESForm *GetFormFromConfigString(const std::string str)
+            {
+            std::string formIDstr;
+            std::string plugin = Util::String::SplitString(str, "|", formIDstr);
+            if (formIDstr.length() != 0)
+            {
+                uint32_t formID = std::stoi(formIDstr, 0, 16);
+                return GetFormFromMod(plugin, formID);
+            }
+            return nullptr;
             }
     };
 }

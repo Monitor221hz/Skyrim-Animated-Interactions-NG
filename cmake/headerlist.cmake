@@ -4,4 +4,5 @@ set(headers ${headers}
     src/hook.h
     src/anim.h
     src/event.h
+    src/takedata.h
 )

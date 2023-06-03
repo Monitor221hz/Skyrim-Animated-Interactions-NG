@@ -1,28 +1,165 @@
 #include "hook.h"
-namespace InteractiveIdles
+#include "settings.cpp"
+#include "util.cpp"
+namespace AnimatedInteractions
 {
-    
 
-     int32_t Hook::PickUp(RE::TESObjectREFR* ref, const char* unk)
-     {
-        bool equipOk = false;
-        auto* plyr = RE::PlayerCharacter::GetSingleton();
-        plyr->GetGraphVariableBool("bEquipOK", equipOk);
-        if (equipOk)
+    void Hook::HandlePickUp(RE::TESObjectREFR *ref)
+    {
+        bool idlePlaying = false;
+        auto *plyr = RE::PlayerCharacter::GetSingleton();
+        auto *settings = Settings::GetSingleton();
+        plyr->GetGraphVariableBool("bForceIdleStop", idlePlaying);
+
+        if (idlePlaying)
+            return;
+
+        auto dif = ref->GetPositionZ() - plyr->GetPositionZ() - 64.0;
+
+        SKSE::log::info("Player Object Diff: {}", dif);
+        if (dif > settings->GetHighTakeBound())
         {
-            InteractiveIdles::AnimPlayer::GetSingleton()->ApplyAnimationSpeed(RE::PlayerCharacter::GetSingleton());
-            float plyrPos = plyr->GetPositionZ()+40.0;
-            SKSE::log::info("Player Z: {} Object Z: {}", plyrPos, ref->GetPositionZ());
-            
-            if (plyrPos <= ref->GetPositionZ())
+            AnimPlayer::GetSingleton()->PlayAnimation(plyr, "TakeHigh"); // high
+        }
+        else if (dif < settings->GetLowTakeBound())
+        {
+            AnimPlayer::GetSingleton()->PlayAnimation(plyr, "TakeLow"); // low
+        }
+        else
+        {
+            AnimPlayer::GetSingleton()->PlayAnimation(plyr, "Take"); // mid
+        }
+    }
+
+    int32_t Hook::PickUp(RE::TESObjectREFR *ref, const char *unk)
+    {
+        bool idlePlaying = false;
+        auto *plyr = RE::PlayerCharacter::GetSingleton();
+        plyr->GetGraphVariableBool("bForceIdleStop", idlePlaying);
+
+        if (idlePlaying)
+            return _PickUp(ref, unk);
+
+        AnimatedInteractions::AnimPlayer::GetSingleton()->ApplyAnimationSpeed(RE::PlayerCharacter::GetSingleton());
+        auto plyrPos = plyr->GetPositionZ() + 40.0;
+        SKSE::log::info("Player Z: {} Object Z: {}", plyrPos, ref->GetPositionZ());
+
+        if (plyrPos <= ref->GetPositionZ())
+        {
+            AnimPlayer::GetSingleton()->PlayAnimation(plyr, "PickUp");
+        }
+        else
+        {
+            AnimPlayer::GetSingleton()->PlayAnimation(plyr, "PickUpLow");
+        }
+
+        return _PickUp(ref, unk);
+    }
+
+    void Hook::ProcessButton(RE::ActivateHandler *a_this, ButtonEvent *a_event, PlayerControlsData *a_data)
+    {
+        uint32_t keyMask = a_event->idCode;
+        uint32_t keyCode;
+        auto device = a_event->device.get();
+
+        if (a_event->IsUp() || PlayerCharacter::GetSingleton()->IsGrabbing() || a_event->HeldDuration() > 0.2)
+        {
+            _ProcessButton(a_this, a_event, a_data);
+            return;
+        }
+
+        if (device == INPUT_DEVICE::kMouse)
+        {
+            keyCode = static_cast<int>(KeyUtil::KBM_OFFSETS::kMacro_NumKeyboardKeys) + keyMask;
+        }
+        else if (device == INPUT_DEVICE::kGamepad)
+        {
+            keyCode = KeyUtil::Interpreter::GamepadMaskToKeycode(keyMask);
+        }
+        else
+        {
+            keyCode = keyMask;
+        }
+        auto control = static_cast<std::string>(a_event->QUserEvent());
+
+        SKSE::log::info("User Event: {} :", control);
+
+        if (control == "Activate")
+            HandleActivatePress();
+
+        _ProcessButton(a_this, a_event, a_data);
+    }
+
+    void Hook::HandleActorPress(const Actor *target)
+    {
+        auto actorBase = target ? target->GetActorBase() : nullptr;
+        if (!actorBase)
+            return;
+        SKSE::log::info("Looting Actor: {} :", actorBase->GetName());
+        auto *animplyr = AnimPlayer::GetSingleton();
+
+        // if (target->IsDead())animplyr->PlayAnimation("SearchKneel");
+    }
+
+    void Hook::HandleObjectPress(RE::NiPointer<RE::TESObjectREFR> refr)
+    {
+        auto base = refr ? refr->GetBaseObject() : nullptr;
+
+        if (!base)
+            return;
+        SKSE::log::info("Activating Object: {} :", base->GetName());
+        auto *animplyr = AnimPlayer::GetSingleton();
+
+        switch (base->GetFormType())
+        {
+        case FormType::Door:
+            animplyr->PlayAnimation("UseDoor");
+            break;
+        case FormType::Container:
+            animplyr->PlayAnimation("SearchChest");
+            break;
+        case FormType::Activator:
+            break;
+        case FormType::NPC:
+            break;
+        default:
+            // TakeData::SetLastTakenItem(base); 
+            TakeData::BuildAnimObjectPath(refr.get());
+            HandlePickUp(refr.get());
+            break;
+        }
+    }
+    void Hook::HandleActivatePress()
+    {
+
+        const auto crossHairPickData = RE::CrosshairPickData::GetSingleton();
+
+        if (!crossHairPickData)
+            return;
+        const auto target = crossHairPickData->target.get();
+        const auto *actorTarget = crossHairPickData->targetActor.get().get();
+
+        if (target)
+            HandleObjectPress(target);
+        if (actorTarget)
+            HandleActorPress(actorTarget->As<RE::Actor>());
+    }
+
+    RE::NiAVObject *Hook::LoadAnimObject(RE::TESModel *a_model, RE::BIPED_OBJECT a_bipedObj, RE::TESObjectREFR *a_actor, RE::BSTSmartPointer<RE::BipedAnim> &a_biped, RE::NiAVObject *a_root)
+    {
+        RE::TESModel *model = a_model;
+
+        if (const auto animObject = PointerUtil::adjust_pointer<RE::TESObjectANIO>(a_model->GetAsModelTextureSwap(), -0x20); animObject)
+        {
+            if (TakeData::IsReplaceable(animObject))
             {
-                AnimPlayer::GetSingleton()->PlayPickUp(plyr);
-            }
-            else 
-            {
-                AnimPlayer::GetSingleton()->PlayPickUpLow(plyr);
+                SKSE::log::info("Replaceable object!"); 
+                model->SetModel(TakeData::GetAnimObjectPath().c_str()); 
+                SKSE::log::info("Animobject Path {}", TakeData::GetAnimObjectPath());
+                //  if (const auto swappedAnimObject = TakeData::GetLinkedAnimObject()) { model = swappedAnimObject; }
             }
         }
-        return _PickUp(ref, unk);
-     }
+
+        return _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root);
+    }
 }
