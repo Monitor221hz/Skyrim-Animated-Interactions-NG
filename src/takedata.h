@@ -27,12 +27,52 @@ namespace AnimatedInteractions
 
         static void BuildAnimObjectPath(TESObjectREFR* refr)
         {
+            WriteLocker locker(itemLock);
             RE::TESBoundObject *boundObj = refr->GetObjectReference();
             if (!boundObj) return;
             RE::TESModel *model = boundObj->As<RE::TESModel>();
             if (!model) return;
             std::string modelName = model->GetModel();
+            
+            NewAnimObject = refr->Get3D2(); 
+            
+
+            
+            
+             
             currentAnimObjectPath = animObjectFolder + modelName; 
+            
+
+            
+        }
+
+        static NiAVObject* GetMeshForAnimObject(NiAVObject* original)
+        {
+            WriteLocker locker(itemLock);
+            auto* root = original->AsFadeNode(); 
+
+            // root->InsertChildAt(1, node->AsTriShape()) ; s
+            // SKSE::log::info("geom name {}",node->GetFirstGeometryOfShaderType(BSShaderMaterial::Feature::kDefault)->name.c_str()); 
+            if (NewAnimObject == nullptr) SKSE::log::info("Null Extract"); 
+            
+            // auto* geom = NewAnimObject->GetFirstGeometryOfShaderType(BSShaderMaterial::Feature::kDefault); 
+            // if (geom == nullptr) geom = NewAnimObject->GetFirstGeometryOfShaderType(BSShaderMaterial::Feature::kEnvironmentMap); 
+            
+            
+            // if (geom == nullptr) SKSE::log::info("Null Geom");
+            // root->DetachChildAt(0); 
+            // root->AttachChild(geom, true);  
+             auto* node = root->GetObjectByName("Attach")->AsNode(); 
+             std::vector<BSGeometry*> geometries = NifUtil::Node::GetAllGeometries(NewAnimObject); 
+             for (auto* geom : geometries)
+             {
+                node->AttachChild(geom, true); 
+             }
+            SKSE::log::info("Num children {}", root->GetChildren().size()); 
+            // node->AddExtraData(original->GetExtraData(FixedStrings::GetSingleton()->prn)); 
+            // SKSE::log::info("node name{}", node->AsTriShape()->name.c_str()); 
+            
+            return root;
         }
 
         static bool IsReplaceable(TESObjectANIO *animObject)
@@ -43,7 +83,7 @@ namespace AnimatedInteractions
 
         static std::string GetAnimObjectPath()
         {
-            ReadLocker(itemLock); 
+            ReadLocker locker(itemLock); 
             return currentAnimObjectPath;  
         }
 
@@ -76,6 +116,7 @@ namespace AnimatedInteractions
         static inline Lock itemLock;
 
         static inline TESForm *LastTakenItem;
+        static inline NiAVObject* NewAnimObject; 
 
         static inline std::unordered_set<TESObjectANIO *> usedAnimObjects;
 

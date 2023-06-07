@@ -3,7 +3,8 @@
 
 
 using namespace RE;
-
+#define CALL_MEMBER_FN(obj, fn)	\
+	((*(obj)).*(*((obj)->_##fn##_GetPtr())))
 namespace PointerUtil //yoinked po3's code
 {
 template <class T, class U>
@@ -220,6 +221,12 @@ namespace NifUtil
 {
     struct Node
 		{
+            static NiAVObject* Clone(NiAVObject* original)
+            {
+                typedef NiAVObject* (*func_t)(NiAVObject* avObj);
+		        REL::Relocation<func_t> func{ RELOCATION_ID(68835, 70187) };
+		        return func(original);
+            }
 			static RE::NiAVObject* GetNiObject(
 				RE::NiNode*              a_root,
 				const RE::BSFixedString& a_name)
@@ -236,6 +243,18 @@ namespace NifUtil
 					a_node->AttachChild(a_object, true);
 				}
 			}
+
+            static std::vector<BSGeometry*> GetAllGeometries(RE::NiAVObject* root)
+            {
+                std::vector<BSGeometry*> geometries; 
+                RE::BSVisit::TraverseScenegraphGeometries(root, [&](BSGeometry* geom)-> RE::BSVisit::BSVisitControl 
+                {
+                    geometries.emplace_back(geom); 
+                    return RE::BSVisit::BSVisitControl::kContinue;
+                }
+				); 
+                return geometries;
+            }
 
 		};
     struct Armature
@@ -267,6 +286,31 @@ namespace NifUtil
     struct Collision
     {
         static bool ToggleMeshCollision(RE::NiAVObject* root,RE::bhkWorld* world, bool collisionState)
+        {
+            constexpr auto no_collision_flag = static_cast<std::uint32_t>(RE::CFilter::Flag::kNoCollision);
+					if (root && world) {
+						
+							RE::BSWriteLockGuard locker(world->worldLock);
+
+							RE::BSVisit::TraverseScenegraphCollision(root, [&](RE::bhkNiCollisionObject* a_col) -> RE::BSVisit::BSVisitControl {
+								if (auto hkpBody = a_col->body ? static_cast<RE::hkpWorldObject*>(a_col->body->referencedObject.get()) : nullptr; hkpBody) {
+									auto& filter = hkpBody->collidable.broadPhaseHandle.collisionFilterInfo;
+									if (!collisionState) {
+										filter |= no_collision_flag;
+									} else {
+										filter &= ~no_collision_flag;
+									}
+								}
+								return RE::BSVisit::BSVisitControl::kContinue;
+							});
+					}
+                    else 
+                    {
+                        return false;
+                    }
+            return true;
+        }
+         static bool RemoveMeshCollision(RE::NiAVObject* root,RE::bhkWorld* world, bool collisionState)
         {
             constexpr auto no_collision_flag = static_cast<std::uint32_t>(RE::CFilter::Flag::kNoCollision);
 					if (root && world) {

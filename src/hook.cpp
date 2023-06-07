@@ -148,18 +148,26 @@ namespace AnimatedInteractions
     RE::NiAVObject *Hook::LoadAnimObject(RE::TESModel *a_model, RE::BIPED_OBJECT a_bipedObj, RE::TESObjectREFR *a_actor, RE::BSTSmartPointer<RE::BipedAnim> &a_biped, RE::NiAVObject *a_root)
     {
         RE::TESModel *model = a_model;
-
+        NiAVObject* output; 
         if (const auto animObject = PointerUtil::adjust_pointer<RE::TESObjectANIO>(a_model->GetAsModelTextureSwap(), -0x20); animObject)
         {
             if (TakeData::IsReplaceable(animObject))
             {
-                SKSE::log::info("Replaceable object!"); 
-                model->SetModel(TakeData::GetAnimObjectPath().c_str()); 
-                SKSE::log::info("Animobject Path {}", TakeData::GetAnimObjectPath());
-                //  if (const auto swappedAnimObject = TakeData::GetLinkedAnimObject()) { model = swappedAnimObject; }
+                output = TakeData::GetMeshForAnimObject(_LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root)); 
+                // SKSE::log::info("Replaceable object!"); 
+                // model->SetModel(TakeData::GetAnimObjectPath().c_str()); 
+                // SKSE::log::info("Animobject Path {}", TakeData::GetAnimObjectPath());
+                //  if (const auto swappedAnimObject = TakeData::GetLinkedAnimObject()) { model = swappedAnimObject; } 
+                SKSE::log::info("Custom mesh returned"); 
+                return output; 
             }
+            else 
+            {
+                return _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root);
+            }
+            
         }
 
-        return _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root);
+         return _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root);
     }
 }
