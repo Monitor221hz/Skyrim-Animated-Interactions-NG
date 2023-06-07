@@ -47,7 +47,7 @@ public:
 			auto* entryForm = FormUtil::Form::GetFormFromConfigString(entry); 
 
 			if ((!keyForm) || (!entryForm) || (entryForm->GetFormType() != FormType::AnimatedObject)) {continue;} 
-			TakeData::AddFormMapping(keyForm, entryForm->As<TESObjectANIO>()); 
+			TakeHandler::AddFormMapping(keyForm, entryForm->As<TESObjectANIO>()); 
 		}
 
 		

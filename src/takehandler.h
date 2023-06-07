@@ -7,7 +7,7 @@ using namespace RE;
 namespace AnimatedInteractions
 {
 
-    struct TakeData
+    struct TakeHandler
     {
 
     public:

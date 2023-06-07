@@ -123,8 +123,8 @@ namespace AnimatedInteractions
         case FormType::NPC:
             break;
         default:
-            // TakeData::SetLastTakenItem(base); 
-            TakeData::BuildAnimObjectPath(refr.get());
+            // TakeHandler::SetLastTakenItem(base); 
+            TakeHandler::BuildAnimObjectPath(refr.get());
             HandlePickUp(refr.get());
             break;
         }
@@ -151,13 +151,13 @@ namespace AnimatedInteractions
         NiAVObject* output; 
         if (const auto animObject = PointerUtil::adjust_pointer<RE::TESObjectANIO>(a_model->GetAsModelTextureSwap(), -0x20); animObject)
         {
-            if (TakeData::IsReplaceable(animObject))
+            if (TakeHandler::IsReplaceable(animObject))
             {
-                output = TakeData::GetMeshForAnimObject(_LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root)); 
+                output = TakeHandler::GetMeshForAnimObject(_LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root)); 
                 // SKSE::log::info("Replaceable object!"); 
-                // model->SetModel(TakeData::GetAnimObjectPath().c_str()); 
-                // SKSE::log::info("Animobject Path {}", TakeData::GetAnimObjectPath());
-                //  if (const auto swappedAnimObject = TakeData::GetLinkedAnimObject()) { model = swappedAnimObject; } 
+                // model->SetModel(TakeHandler::GetAnimObjectPath().c_str()); 
+                // SKSE::log::info("Animobject Path {}", TakeHandler::GetAnimObjectPath());
+                //  if (const auto swappedAnimObject = TakeHandler::GetLinkedAnimObject()) { model = swappedAnimObject; } 
                 SKSE::log::info("Custom mesh returned"); 
                 return output; 
             }

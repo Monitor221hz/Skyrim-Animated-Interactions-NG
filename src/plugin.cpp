@@ -21,12 +21,12 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	case SKSE::MessagingInterface::kPreLoadGame:
 		break;
 	case SKSE::MessagingInterface::kPostLoadGame:
-		TakeData::Load(); 
+		TakeHandler::Load(); 
 		AnimatedInteractions::AnimPlayer::GetSingleton()->GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
         break;
 	case SKSE::MessagingInterface::kNewGame:
-		TakeData::Load(); 
+		TakeHandler::Load(); 
 		AnimatedInteractions::AnimPlayer::GetSingleton()->GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
 		break;
