@@ -42,6 +42,7 @@ namespace AnimatedInteractions
                 // IdleSearchChest =  RE::TESForm::LookupByID<RE::TESIdleForm>(0x5900);
                 // IdleSearchKneel = RE::TESForm::LookupByID<RE::TESIdleForm>(0x5903);
                 WriteLocker locker(animLock);
+                
                 idleMap.emplace("Exit", GetIdleForm(0x5901) );
                 idleMap.emplace("SearchKneel",GetIdleForm(0x5903));
                 idleMap.emplace("SearchChest",GetIdleForm(0x5900) );
@@ -97,7 +98,7 @@ namespace AnimatedInteractions
             ReadLocker locker(animLock);
             if (!State) return;
             RE::PlayerCamera::GetSingleton()->ForceThirdPerson();
-            actor->SetGraphVariableFloat("II_AnimationSpeed", Settings::GetSingleton()->GetAnimationSpeed());
+            actor->SetGraphVariableFloat("II_AnimationSpeed", static_cast<float>(Settings::GetSingleton()->GetAnimationSpeed()));
             if (!AnimUtil::Idle::Play(idleMap[idleName], actor, RE::DEFAULT_OBJECT::kActionIdle, nullptr))
             {
                 SKSE::log::warn("PlayAnimation failed at: {} for actor: {}", idleName, actor->GetActorBase()->GetName());

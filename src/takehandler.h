@@ -2,7 +2,7 @@
 #include <unordered_set>
 #include <shared_mutex>
 #include "util.h"
-
+#include "configmanager.h"
 using namespace RE;
 namespace AnimatedInteractions
 {
@@ -29,7 +29,8 @@ namespace AnimatedInteractions
     private:
 
 
-        static NiNode* GetAttachNode(NiAVObject* animObjectMesh); 
+        static NiNode* GetAttachNode(NiAVObject* animObjectMesh);
+        
         using Lock = std::shared_mutex;
         using ReadLocker = std::shared_lock<Lock>;
         using WriteLocker = std::unique_lock<Lock>;
@@ -37,6 +38,7 @@ namespace AnimatedInteractions
         static inline Lock itemLock;
 
         static inline NiAVObject* ReferenceMesh; 
+        static inline Config* SelectedConfig; 
 
         static inline std::string_view TakenObjectType; 
 

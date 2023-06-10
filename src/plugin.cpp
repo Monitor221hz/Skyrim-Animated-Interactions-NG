@@ -3,6 +3,7 @@
 #include "anim.h"
 #include "event.h"
 #include "takehandler.h"
+#include "configmanager.h"
 void OnDataLoaded()
 {
    
@@ -13,8 +14,9 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
-	    AnimatedInteractions::EventHandler::Install();
+	    EventHandler::Install();
 		Settings::GetSingleton()->LoadSettings();
+		ConfigManager::LoadAllConfigs();
 		break;
 	case SKSE::MessagingInterface::kPostLoad:
 		break;
@@ -22,12 +24,13 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 		break;
 	case SKSE::MessagingInterface::kPostLoadGame:
 		TakeHandler::Load(); 
-		AnimatedInteractions::AnimPlayer::GetSingleton()->GetIdleRecords();
+		AnimPlayer::GetSingleton()->GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
+		ConfigManager::LoadAllConfigs();
         break;
 	case SKSE::MessagingInterface::kNewGame:
 		TakeHandler::Load(); 
-		AnimatedInteractions::AnimPlayer::GetSingleton()->GetIdleRecords();
+		AnimPlayer::GetSingleton()->GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
 		break;
 	}

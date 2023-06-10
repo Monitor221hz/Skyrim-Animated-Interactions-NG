@@ -26,7 +26,7 @@ public:
 
 	void LoadSettings()
 	{
-		constexpr auto path = L"Data/SKSE/Plugins/Animated Interactions.ini";
+		constexpr auto path = L"Data/SKSE/Plugins/Animated_Interactions/Settings.ini";
 		CSimpleIniA ini;
 		ini.SetUnicode();
 		
@@ -38,12 +38,6 @@ public:
         SKSE::log::info("Settings loaded. Animation speed {} ", animation.AnimationSpeed);
 		std::list<CSimpleIniA::Entry> Sections;
 		ini.GetAllSections(Sections);
-
-		
-
-		
-
-		
 		// weather.SnowVisionAngleDegrees = ini.GetLongValue("Weather", "SnowVisionAngleDegrees");
 		// weather.RainSoundLevelMultiplier = ini.GetLongValue("Weather", "RainSoundLevelMultiplier");
 		

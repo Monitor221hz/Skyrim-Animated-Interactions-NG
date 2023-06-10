@@ -82,7 +82,7 @@ namespace AnimatedInteractions
         }
         auto control = static_cast<std::string>(a_event->QUserEvent());
 
-        SKSE::log::info("User Event: {} :", control);
+        
 
         if (control == "Activate")
             HandleActivatePress();
@@ -154,11 +154,10 @@ namespace AnimatedInteractions
             if (TakeHandler::IsReplaceable(animObject))
             {
                 output = TakeHandler::GetMeshForTakenObject(output); 
-                SKSE::log::info("model path {}", model->GetModel()); 
+                 
                 // model->SetModel(TakeHandler::GetAnimObjectPath().c_str()); 
                 // SKSE::log::info("Animobject Path {}", TakeHandler::GetAnimObjectPath());
                 //  if (const auto swappedAnimObject = TakeHandler::GetLinkedAnimObject()) { model = swappedAnimObject; } 
-                SKSE::log::info("Custom mesh returned"); 
                  
             }
             
