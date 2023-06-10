@@ -1,7 +1,8 @@
 #pragma once
-#include "util.cpp"
+#include "util.h"
 #include "settings.cpp"
 #include <shared_mutex>
+
 namespace AnimatedInteractions
 {
     class AnimPlayer

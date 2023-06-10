@@ -1,7 +1,7 @@
 
 #pragma once
 #include "anim.h"
-#include "takedata.h"
+#include "takehandler.h"
 using namespace RE;
 namespace AnimatedInteractions
 {

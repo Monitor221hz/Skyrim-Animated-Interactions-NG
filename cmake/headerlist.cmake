@@ -5,4 +5,6 @@ set(headers ${headers}
     src/anim.h
     src/event.h
     src/takehandler.h
+    src/util.h
+    src/configmanager.h
 )

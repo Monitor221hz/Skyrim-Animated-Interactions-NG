@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SimpleIni.h"
-#include "takedata.h"
-#include "util.cpp"
+#include "takehandler.h"
+#include "util.h"
 using namespace RE; 
 namespace AnimatedInteractions
 {
@@ -39,16 +39,7 @@ public:
 		std::list<CSimpleIniA::Entry> Sections;
 		ini.GetAllSections(Sections);
 
-		auto AnimObjSection = ini.GetSection("AnimObjects"); 
-
-		for(auto& [key, entry] : *AnimObjSection)
-		{
-			auto* keyForm = FormUtil::Form::GetFormFromConfigString(key.pItem); 
-			auto* entryForm = FormUtil::Form::GetFormFromConfigString(entry); 
-
-			if ((!keyForm) || (!entryForm) || (entryForm->GetFormType() != FormType::AnimatedObject)) {continue;} 
-			TakeHandler::AddFormMapping(keyForm, entryForm->As<TESObjectANIO>()); 
-		}
+		
 
 		
 

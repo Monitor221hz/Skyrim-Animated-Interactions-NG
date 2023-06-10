@@ -1,6 +1,6 @@
 #include "hook.h"
 #include "settings.cpp"
-#include "util.cpp"
+#include "util.h"
 namespace AnimatedInteractions
 {
 
@@ -107,7 +107,7 @@ namespace AnimatedInteractions
 
         if (!base)
             return;
-        SKSE::log::info("Activating Object: {} :", base->GetName());
+        
         auto *animplyr = AnimPlayer::GetSingleton();
 
         switch (base->GetFormType())
@@ -124,7 +124,7 @@ namespace AnimatedInteractions
             break;
         default:
             // TakeHandler::SetLastTakenItem(base); 
-            TakeHandler::BuildAnimObjectPath(refr.get());
+            TakeHandler::StoreReferenceMesh(refr.get());
             HandlePickUp(refr.get());
             break;
         }
@@ -148,26 +148,22 @@ namespace AnimatedInteractions
     RE::NiAVObject *Hook::LoadAnimObject(RE::TESModel *a_model, RE::BIPED_OBJECT a_bipedObj, RE::TESObjectREFR *a_actor, RE::BSTSmartPointer<RE::BipedAnim> &a_biped, RE::NiAVObject *a_root)
     {
         RE::TESModel *model = a_model;
-        NiAVObject* output; 
+        NiAVObject* output = _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root); 
         if (const auto animObject = PointerUtil::adjust_pointer<RE::TESObjectANIO>(a_model->GetAsModelTextureSwap(), -0x20); animObject)
         {
             if (TakeHandler::IsReplaceable(animObject))
             {
-                output = TakeHandler::GetMeshForAnimObject(_LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root)); 
-                // SKSE::log::info("Replaceable object!"); 
+                output = TakeHandler::GetMeshForTakenObject(output); 
+                SKSE::log::info("model path {}", model->GetModel()); 
                 // model->SetModel(TakeHandler::GetAnimObjectPath().c_str()); 
                 // SKSE::log::info("Animobject Path {}", TakeHandler::GetAnimObjectPath());
                 //  if (const auto swappedAnimObject = TakeHandler::GetLinkedAnimObject()) { model = swappedAnimObject; } 
                 SKSE::log::info("Custom mesh returned"); 
-                return output; 
-            }
-            else 
-            {
-                return _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root);
+                 
             }
             
         }
 
-         return _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root);
+         return output;
     }
 }

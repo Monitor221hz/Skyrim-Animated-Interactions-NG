@@ -1,7 +1,6 @@
 #pragma once
 
 
-
 using namespace RE;
 #define CALL_MEMBER_FN(obj, fn)	\
 	((*(obj)).*(*((obj)->_##fn##_GetPtr())))
@@ -22,7 +21,31 @@ inline auto adjust_pointer(U* a_ptr, std::ptrdiff_t a_adjust) noexcept
 	}
 }
 }
+namespace SystemUtil
+{
+    struct File 
+    {
+        
+	static std::vector<std::string> GetConfigs(std::string_view a_folder, std::string_view a_suffix, std::string_view a_extension = ".ini"sv)
+	{
+		std::vector<std::string> configs{};
 
+		for (const auto iterator = std::filesystem::directory_iterator(a_folder); const auto& entry : iterator) {
+			if (entry.exists()) {
+				if (const auto& path = entry.path(); !path.empty() && path.extension() == a_extension) {
+					if (const auto& fileName = entry.path().string(); fileName.rfind(a_suffix) != std::string::npos) {
+						configs.push_back(fileName);
+					}
+				}
+			}
+		}
+
+		std::ranges::sort(configs);
+
+		return configs;
+	}
+    };
+}
 
 namespace KeyUtil 
 {
@@ -101,23 +124,80 @@ namespace Util
 {
     struct String
     {
-static std::string SplitString(const std::string str, const std::string delimiter, std::string &remainder)
-{
-    std::string ret;
-    size_t i = str.find(delimiter);
-    if (i == std::string::npos)
-    {
-        ret = str;
-        remainder = "";
-        return ret;
-    }
+		static std::vector<std::string> Split(const std::string& a_str, std::string_view a_delimiter)
+		{
+			auto range = a_str | std::ranges::views::split(a_delimiter) | std::ranges::views::transform([](auto&& r) { return std::string_view(r); });
+			return { range.begin(), range.end() };
+		}
 
-    ret = str.substr(0, i);
-    remainder = str.substr(i + 1);
-    return ret;
-}
+        static bool iContains(std::string_view a_str1, std::string_view a_str2)
+		{
+			if (a_str2.length() > a_str1.length()) {
+				return false;
+			}
+
+			const auto subrange = std::ranges::search(a_str1, a_str2, [](unsigned char ch1, unsigned char ch2) {
+				return std::toupper(ch1) == std::toupper(ch2);
+			});
+
+			return !subrange.empty();
+		}
+
+		static bool iEquals(std::string_view a_str1, std::string_view a_str2)
+		{
+			return std::ranges::equal(a_str1, a_str2, [](unsigned char ch1, unsigned char ch2) {
+				return std::toupper(ch1) == std::toupper(ch2);
+			});
+		}
+
+		// https://stackoverflow.com/a/35452044
+		static std::string Join(const std::vector<std::string>& a_vec, std::string_view a_delimiter)
+		{
+			return std::accumulate(a_vec.begin(), a_vec.end(), std::string{},
+				[a_delimiter](const auto& str1, const auto& str2) {
+					return str1.empty() ? str2 : str1 + a_delimiter.data() + str2;
+				});
+		}
+
+        static std::vector<float> ToFloatVector(const std::vector<std::string> stringVector)
+        {
+            std::vector<float> floatNumbers; 
+            for(auto str : stringVector)
+            {
+                float num = atof(str.c_str());
+                floatNumbers.push_back(num);
+            }
+            return floatNumbers;
+        }
+
     };
 
+}
+
+namespace MathUtil
+{
+    struct Angle 
+    {
+        [[nodiscard]] constexpr static float DegreeToRadian(float a_angle)
+        {
+            return a_angle * 0.017453292f;
+        }
+
+        [[nodiscard]] constexpr static float RadianToDegree(float a_radian)
+        {
+            return a_radian * 57.295779513f;
+        }
+
+        static NiPoint3 ToRadianVector(float x, float y, float z)
+        {
+            RE::NiPoint3 rotationVector{ 0.f, 0.f, 0.f };
+
+            rotationVector.x = DegreeToRadian(x); 
+            rotationVector.y = DegreeToRadian(y); 
+            rotationVector.z = DegreeToRadian(z); 
+            return rotationVector; 
+        }
+    }; 
 }
 namespace PerkUtil {
     struct EntryVisitor : public RE::PerkEntryVisitor {
@@ -204,17 +284,7 @@ namespace FormUtil
             return RE::TESForm::LookupByID(id);
             }
 
-            static TESForm *GetFormFromConfigString(const std::string str)
-            {
-            std::string formIDstr;
-            std::string plugin = Util::String::SplitString(str, "|", formIDstr);
-            if (formIDstr.length() != 0)
-            {
-                uint32_t formID = std::stoi(formIDstr, 0, 16);
-                return GetFormFromMod(plugin, formID);
-            }
-            return nullptr;
-            }
+
     };
 }
 namespace NifUtil
