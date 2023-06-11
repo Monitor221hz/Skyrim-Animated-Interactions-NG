@@ -14,8 +14,7 @@ namespace AnimatedInteractions
             ReferenceMesh = refr->Get3D2();//to do: fix missing mesh after getting interrupted by menu open
             
             RE::TESModel* model = ReferenceMesh->GetUserData()->GetObjectReference()->As<RE::TESModel>();
-             
-            SelectedConfig = ConfigManager::GetMeshConfigPtr(model->GetModel());
+            if (model != nullptr) SelectedConfig = ConfigManager::GetMeshConfigPtr(model->GetModel());
             if (SelectedConfig == nullptr) 
             {
                 SKSE::log::info("Config for {} not found, using default alignment", model->GetModel());
