@@ -120,7 +120,17 @@ namespace AnimatedInteractions
             break;
         case FormType::Activator:
             break;
+        case FormType::TalkingActivator:
+            break;
         case FormType::NPC:
+            break;
+        case FormType::Static:
+            break;
+        case FormType::MovableStatic:
+            break;
+        case FormType::Furniture:
+            break; 
+        case FormType::PlacedHazard:
             break;
         default:
             // TakeHandler::SetLastTakenItem(base); 
