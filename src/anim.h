@@ -17,10 +17,14 @@ namespace AnimatedInteractions
             {
                 static AnimPlayer singleton;
                 return &singleton;
-            } 
+            }
 
-            
-
+            static void Papyrus_ForceThirdPerson()
+            {
+                using func_t = decltype(&Papyrus_ForceThirdPerson);
+                REL::Relocation<func_t> func{REL::RelocationID(54948, 55565)};
+                return func();
+            }
             bool BehaviorPatchInstalled()
             {
                 bool bDummy;
@@ -97,14 +101,13 @@ namespace AnimatedInteractions
         {   
             ReadLocker locker(animLock);
             if (!State) return;
-            RE::PlayerCamera::GetSingleton()->ForceThirdPerson();
+            // RE::PlayerCamera::GetSingleton()->ForceThirdPerson();
+            Papyrus_ForceThirdPerson();
             actor->SetGraphVariableFloat("II_AnimationSpeed", static_cast<float>(Settings::GetSingleton()->GetAnimationSpeed()));
             if (!AnimUtil::Idle::Play(idleMap[idleName], actor, RE::DEFAULT_OBJECT::kActionIdle, nullptr))
             {
                 SKSE::log::warn("PlayAnimation failed at: {} for actor: {}", idleName, actor->GetActorBase()->GetName());
             }
-
-
         }
 
 
