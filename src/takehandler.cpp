@@ -4,24 +4,17 @@ namespace AnimatedInteractions
 {
     void TakeHandler::StoreReferenceMesh(TESObjectREFR *refr)
         {
-            WriteLocker locker(itemLock);
+             WriteLocker locker(itemLock);
             TakenObjectType = FormTypeToString(refr->GetBaseObject()->GetFormType());
             
             refr->Load3D(false);
 
             auto* ref3D = refr->Get3D2();
             if (ref3D == ReferenceMesh) return;
-            ReferenceMesh = refr->Get3D2();//to do: fix missing mesh after getting interrupted by menu open
+            ReferenceMesh = refr->Get3D2();
             
-            RE::TESModel* model = ReferenceMesh->GetUserData()->GetObjectReference()->As<RE::TESModel>();
-            if (model != nullptr) SelectedConfig = ConfigManager::GetMeshConfigPtr(model->GetModel());
-            if (SelectedConfig == nullptr) 
-            {
-                SKSE::log::info("Config for {} not found, using default alignment", model->GetModel());
-                SelectedConfig = ConfigManager::GetFormConfigPtr(refr->GetBaseObject()->GetFormType());
-                if (SelectedConfig == nullptr) SKSE::log::warn("Default alignment for {} not found", refr->GetBaseObject()->GetFormType());
-            }
-            // refr->Load3D(true);
+            refr->Load3D(true);
+            SKSE::log::info("Reference mesh obtained");
         }
 
         NiNode* TakeHandler::GetAttachNode(NiAVObject* animObjectMesh)
@@ -31,7 +24,22 @@ namespace AnimatedInteractions
             NiNode* defaultAttachNode = root->GetObjectByName("Attach")->AsNode(); 
             return defaultAttachNode;
         }
-        
+
+
+
+        int32_t TakeHandler::ConstructNiStream(char *address, void *memory, void* num)
+        {
+            using func_t = decltype(ConstructNiStream);
+            REL::Relocation<func_t> func{RELOCATION_ID(74039, 0)};
+            return func(address, memory, num);
+        }
+
+        void TakeHandler::DestructNiStream(NiStream *niStream)
+        {
+            using func_t = decltype(DestructNiStream); 
+            REL::Relocation<func_t> func{RELOCATION_ID(68972, 0)}; 
+            func(niStream); 
+        }
 
         NiAVObject* TakeHandler::GetMeshForTakenObject(NiAVObject* original)
         {
@@ -40,6 +48,7 @@ namespace AnimatedInteractions
             
             if (ReferenceMesh == nullptr) SKSE::log::info("Null Extract"); 
             
+             
              auto* node = GetAttachNode(original);  
              Config config; 
              
@@ -52,9 +61,13 @@ namespace AnimatedInteractions
                 SKSE::log::info("Trishape Attached: {}", geom->name.c_str());
                 node->AttachChild(clone, true); 
              }
-            // SKSE::log::info("Num children {}", root->GetChildren().size()); 
+            // SKSE::log::info("Num children {}", root->GetChildren().size());
+            //  auto *user = ReferenceMesh->GetUserData();
+            //  if (user)
+            //     user->SetDelete(true);
 
-            return original->AsFadeNode();
+            Reference->SetDelete(true); 
+             return original->AsFadeNode();
         }
 
         bool TakeHandler::IsReplaceable(TESObjectANIO *animObject)

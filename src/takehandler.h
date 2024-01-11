@@ -30,7 +30,10 @@ namespace AnimatedInteractions
 
 
         static NiNode* GetAttachNode(NiAVObject* animObjectMesh);
-        
+
+
+        static int32_t ConstructNiStream(char* address, void* memory, void* num); 
+        static void DestructNiStream(NiStream* niStream);
         using Lock = std::shared_mutex;
         using ReadLocker = std::shared_lock<Lock>;
         using WriteLocker = std::unique_lock<Lock>;
@@ -38,6 +41,7 @@ namespace AnimatedInteractions
         static inline Lock itemLock;
 
         static inline NiAVObject* ReferenceMesh; 
+        static inline TESObjectREFR* Reference; 
         static inline Config* SelectedConfig; 
 
         static inline std::string_view TakenObjectType; 

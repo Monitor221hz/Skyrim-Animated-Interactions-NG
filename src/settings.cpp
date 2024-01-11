@@ -24,6 +24,13 @@ public:
 
     };
 
+	struct Camera
+	{
+		bool ForceThirdPerson = false; 
+		
+
+	}; 
+
 	void LoadSettings()
 	{
 		constexpr auto path = L"Data/SKSE/Plugins/Animated_Interactions/Settings.ini";
@@ -34,6 +41,8 @@ public:
 		animation.AnimationSpeed= ini.GetDoubleValue("Animation", "AnimationSpeedMultiplier", 1.0);
 		animation.HighThreshold = ini.GetDoubleValue("Animation", "TakeHighThreshold", 50.0);
 		animation.LowThreshold = ini.GetDoubleValue("Animation", "TakeLowThreshold", -50.0);
+		camera.ForceThirdPerson = ini.GetBoolValue("Camera", "ForceThirdPerson", false); 
+
 
         SKSE::log::info("Settings loaded. Animation speed {} ", animation.AnimationSpeed);
 		std::list<CSimpleIniA::Entry> Sections;
@@ -61,6 +70,7 @@ public:
     [[nodiscard]] double GetAnimationSpeed() const { return animation.AnimationSpeed; }
 	[[nodiscard]] double GetHighTakeBound() const { return animation.HighThreshold; }
 	[[nodiscard]] double GetLowTakeBound() const { return animation.LowThreshold; }
+	[[nodiscard]] bool GetForceThirdPerson() const { return camera.ForceThirdPerson; }
 	// [[nodiscard]] int GetCrosshairMode() const { return crosshair.mode; }
 
 
@@ -68,6 +78,7 @@ public:
 private:
 
     Animation animation;
+	Camera camera; 
 
 	Settings() = default;
 	Settings(const Settings&) = delete;

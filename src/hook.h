@@ -5,16 +5,39 @@
 using namespace RE;
 namespace AnimatedInteractions
 {
+    class PlayerPickUpHook
+    {
+        static void Install()
+        {
+            SKSE::log::info("Installing Hook: Player Pick Up");
+
+            REL::Relocation<std::uintptr_t> playerVtbl{VTABLE_PlayerCharacter[0]}; 
+
+            _PickUpItem = playerVtbl.write_vfunc(0xCC, PickUpItem);
+
+            SKSE::log::info("Installed Hook: Player Pick Up");
+        }
+
+        private:
+
+        static void PickUpItem(Actor* a_actor, TESObjectREFR* a_ref, std::int32_t a_count, bool a_arg3, bool a_playSound);
+
+        static inline REL::Relocation<decltype(PickUpItem)> _PickUpItem;
+
+    };
     class Hook
     {
     public:
         static void InstallPickUpHook()
         {
             SKSE::log::info("Installing Hook: Pick Up");
-            auto &trampoline = SKSE::GetTrampoline();
-            SKSE::AllocTrampoline(16);
-            REL::Relocation<std::uintptr_t> target{REL::RelocationID(39456, 0), REL::Relocate(0x5FA, 0)};
-            _PickUp = trampoline.write_call<5>(target.address(), PickUp);
+
+            REL::Relocation<std::uintptr_t> characterVtbl{VTABLE_Character[0]}; 
+
+            // auto &trampoline = SKSE::GetTrampoline();
+            // SKSE::AllocTrampoline(16);
+            // REL::Relocation<std::uintptr_t> target{REL::RelocationID(39456, 0), REL::Relocate(0x5FA, 0)};
+            // _PickUp = trampoline.write_call<5>(target.address(), PickUp);
 
             SKSE::log::info("Hook: Pick up installed");
         }
@@ -77,7 +100,7 @@ namespace AnimatedInteractions
         static int32_t PickUp(RE::TESObjectREFR *ref, const char *unk);
 
         static void ProcessButton(RE::ActivateHandler* a_this,ButtonEvent *a_event, PlayerControlsData *a_data);
-
+        static void FaceObject(TESObjectREFR* refr);
         static void HandleActivatePress();
         static void HandleActorPress(const Actor *target);
         static void HandleObjectPress(RE::NiPointer<RE::TESObjectREFR> refr);

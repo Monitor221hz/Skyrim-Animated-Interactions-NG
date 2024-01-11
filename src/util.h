@@ -1,6 +1,14 @@
 #pragma once
 
 
+#define PI 3.1415926535897932f
+#define TWOTHIRDS_PI 2.0943951023931955f
+#define TWO_PI 6.2831853071795865f
+#define PI2 1.5707963267948966f
+#define PI3 1.0471975511965977f
+#define PI4 0.7853981633974483f
+#define PI8 0.3926990816987242f
+
 using namespace RE;
 #define CALL_MEMBER_FN(obj, fn)	\
 	((*(obj)).*(*((obj)->_##fn##_GetPtr())))
@@ -211,8 +219,68 @@ namespace MathUtil
             rotationVector.z = DegreeToRadian(z); 
             return rotationVector; 
         }
+
+        static float NormalAbsoluteAngle(float a_angle)
+        {
+            while (a_angle < 0)
+                a_angle += TWO_PI;
+            while (a_angle > TWO_PI)
+                a_angle -= TWO_PI;
+            return a_angle;
+
+            // return fmod(a_angle, TWO_PI) >= 0 ? a_angle : (a_angle + TWO_PI);
+        }
+
+        static float NormalRelativeAngle(float a_angle)
+        {
+            while (a_angle > PI)
+                a_angle -= TWO_PI;
+            while (a_angle < -PI)
+                a_angle += TWO_PI;
+            return a_angle;
+
+            // return fmod(a_angle, TWO_PI) >= 0 ? (a_angle < PI) ? a_angle : a_angle - TWO_PI : (a_angle >= -PI) ? a_angle : a_angle + TWO_PI;
+        }
     }; 
 }
+namespace ObjectUtil
+{
+    struct Transform
+    {
+        static void TranslateTo(RE::BSScript::IVirtualMachine *vm, RE::VMStackID stackID, RE::TESObjectREFR *object, float afX, float afY, float afZ, float afAngleX, float afAngleY, float afAngleZ, float afSpeed, float afMaxRotationSpeed)
+        {
+            using func_t = decltype(TranslateTo);
+            REL::Relocation<func_t> func{RELOCATION_ID(55706, 56237)};
+            func(vm, stackID, object, afX, afY, afZ, afAngleX, afAngleY, afAngleZ, afSpeed, afMaxRotationSpeed);
+        }
+
+        static float InterpAngleTo(float a_current, float a_target, float a_deltaTime, float a_interpSpeed)
+        {
+            if (a_interpSpeed <= 0.f)
+            {
+                return a_target;
+            }
+
+            const float distance = MathUtil::Angle::NormalRelativeAngle(a_target - a_current);
+
+            if (distance * distance < FLT_EPSILON)
+            {
+                return a_target;
+            }
+
+            const float delta = distance * Clamp(a_deltaTime * a_interpSpeed, 0.f, 1.f);
+
+            return a_current + delta;
+        }
+
+        static float Clamp(float value, float min, float max)
+        {
+            return value < min ? min : value < max ? value
+                                                   : max;
+        }
+    };
+}
+
 namespace PerkUtil {
     struct EntryVisitor : public RE::PerkEntryVisitor {
     public:

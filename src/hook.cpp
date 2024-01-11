@@ -100,11 +100,23 @@ namespace AnimatedInteractions
 
         // if (target->IsDead())animplyr->PlayAnimation("SearchKneel");
     }
-
+    void Hook::FaceObject(TESObjectREFR* refr)
+    {
+        auto* plyr = PlayerCharacter::GetSingleton(); 
+        auto* playerCamera = RE::PlayerCamera::GetSingleton();
+        auto thirdPersonState = static_cast<RE::ThirdPersonState*>(playerCamera->currentState.get());
+        float headingAngle =MathUtil::Angle::RadianToDegree(plyr->GetHeadingAngle(refr->GetPosition(), false)); 
+        float newAngle = plyr->GetAngleZ() + headingAngle ; //radians
+        
+        // ObjectUtil::Transform::TranslateTo(nullptr, 0, plyr, plyr->GetPositionX(), plyr->GetPositionY(), plyr->GetPositionZ(), 
+        // plyr->GetAngleX(), plyr->GetAngleY(), newAngle, 1000.0, 50.0); 
+        plyr->SetRotationZ(newAngle);
+        thirdPersonState->freeRotation.x -= headingAngle; 
+    }
     void Hook::HandleObjectPress(RE::NiPointer<RE::TESObjectREFR> refr)
     {
         auto base = refr ? refr->GetBaseObject() : nullptr;
-
+        auto* ref = refr.get();
         if (!base)
             return;
         
@@ -113,14 +125,19 @@ namespace AnimatedInteractions
         switch (base->GetFormType())
         {
         case FormType::Door:
+            // FaceObject(ref); 
             animplyr->PlayAnimation("UseDoor");
+            
             break;
         case FormType::Container:
+            // FaceObject(ref); 
             animplyr->PlayAnimation("SearchChest");
             break;
         case FormType::Activator:
+            // FaceObject(ref); 
             break;
         case FormType::TalkingActivator:
+            // FaceObject(ref); 
             break;
         case FormType::NPC:
             break;
@@ -129,6 +146,7 @@ namespace AnimatedInteractions
         case FormType::MovableStatic:
             break;
         case FormType::Furniture:
+            // FaceObject(ref); 
             break; 
         case FormType::PlacedHazard:
             break;
@@ -163,6 +181,8 @@ namespace AnimatedInteractions
         {
             if (TakeHandler::IsReplaceable(animObject))
             {
+
+                
                 output = TakeHandler::GetMeshForTakenObject(output); 
                  
                 // model->SetModel(TakeHandler::GetAnimObjectPath().c_str()); 
@@ -174,5 +194,9 @@ namespace AnimatedInteractions
         }
 
          return output;
+    }
+    void PlayerPickUpHook::PickUpItem(Actor *a_actor, TESObjectREFR *a_ref, std::int32_t a_count, bool a_arg3, bool a_playSound)
+    {
+        _PickUpItem(a_actor, a_ref, a_count, a_arg3, a_playSound);
     }
 }
