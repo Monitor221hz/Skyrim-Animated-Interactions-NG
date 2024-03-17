@@ -45,8 +45,8 @@ namespace AnimatedInteractions
         public: 
 
 
-        static Config* GetMeshConfigPtr(std::string meshPath);
-        static Config* GetFormConfigPtr(FormType formType);
+        static Config* GetMeshConfigPtr(std::string mesh_path);
+        static Config* GetFormConfigPtr(FormType form_type);
 
         
 
@@ -62,9 +62,9 @@ namespace AnimatedInteractions
 
         private: 
 
-        static inline std::unordered_map<std::string, Config> meshConfigs; 
+        static inline std::unordered_map<std::string, Config> mesh_configs; 
 
-        static inline std::unordered_map<std::string, Config> formConfigs;
+        static inline std::unordered_map<std::string, Config> form_configs;
         
     };
 }

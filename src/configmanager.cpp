@@ -4,18 +4,18 @@ namespace AnimatedInteractions
     Config* ConfigManager::GetMeshConfigPtr(std::string meshPath)
     {
         meshPath = Util::String::ToLower(meshPath);
-        return meshConfigs.count(meshPath) > 0 ? &meshConfigs[meshPath] : nullptr;
+        return mesh_configs.count(meshPath) > 0 ? &mesh_configs[meshPath] : nullptr;
     }
 
     Config* ConfigManager::GetFormConfigPtr(FormType formType)
     {
         std::string formTypeName = std::string(FormTypeToString(formType));
-        return formConfigs.count(formTypeName) > 0 ? &formConfigs[formTypeName] : nullptr;
+        return form_configs.count(formTypeName) > 0 ? &form_configs[formTypeName] : nullptr;
     }
 
     void ConfigManager::LoadMasterConfig()
     {
-        formConfigs.clear();
+        form_configs.clear();
         constexpr auto path = L"Data/SKSE/Plugins/Animated_Interactions/Alignment.ini";
 
         CSimpleIniA ini; 
@@ -32,7 +32,7 @@ namespace AnimatedInteractions
                     {
                         Config config; 
                         config.BuildFromString(entry);
-                        formConfigs.emplace(Util::String::ToUpper(key.pItem),config);
+                        form_configs.emplace(Util::String::ToUpper(key.pItem),config);
                         SKSE::log::info("Alignment data found for: ({})", key.pItem);
                     }
                     catch (...)
@@ -47,7 +47,7 @@ namespace AnimatedInteractions
     void ConfigManager::LoadUserConfigs()
     {
         std::vector<std::string> files = SystemUtil::File::GetConfigs(R"(Data\)", "_AINTR"sv);
-        meshConfigs.clear();
+        mesh_configs.clear();
         for (auto path : files)
         {
             CSimpleIniA ini;
@@ -68,7 +68,7 @@ namespace AnimatedInteractions
                     {
                         Config config; 
                         config.BuildFromString(entry);
-                        meshConfigs.emplace(Util::String::ToLower(key.pItem),config);
+                        mesh_configs.emplace(Util::String::ToLower(key.pItem),config);
                     }
                     catch (...)
                     {

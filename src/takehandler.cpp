@@ -1,5 +1,5 @@
 #include "takehandler.h"
-
+#include "anim.h"
 namespace AnimatedInteractions
 {
     void TakeHandler::StoreReferenceMesh(TESObjectREFR *refr)
@@ -58,6 +58,7 @@ namespace AnimatedInteractions
              for (auto* geom : geometries)
              {
                 auto* clone = NifUtil::Node::Clone(geom);
+                
                 SKSE::log::info("Trishape Attached: {}", geom->name.c_str());
                 node->AttachChild(clone, true); 
              }
@@ -66,7 +67,7 @@ namespace AnimatedInteractions
             //  if (user)
             //     user->SetDelete(true);
 
-            Reference->SetDelete(true); 
+
              return original->AsFadeNode();
         }
 
@@ -74,5 +75,32 @@ namespace AnimatedInteractions
         {
             ReadLocker locker(itemLock); 
             return (usedAnimObjects.count(animObject) > 0);
+        }
+
+        void TakeHandler::HandlePickUpPlayer(RE::TESObjectREFR *ref)
+        {
+            bool idlePlaying = false;
+            auto *plyr = RE::PlayerCharacter::GetSingleton();
+            auto *settings = Settings::GetSingleton();
+            plyr->GetGraphVariableBool("bForceIdleStop", idlePlaying);
+
+            if (idlePlaying)
+                return;
+
+            auto dif = ref->GetPositionZ() - plyr->GetPositionZ() - 64.0;
+
+            SKSE::log::info("Player Object Diff: {}", dif);
+            if (dif > settings->GetHighTakeBound())
+            {
+                AnimPlayer::GetSingleton()->PlayAnimation(plyr, "TakeHigh"); // high
+            }
+            else if (dif < settings->GetLowTakeBound())
+            {
+                AnimPlayer::GetSingleton()->PlayAnimation(plyr, "TakeLow"); // low
+            }
+            else
+            {
+                AnimPlayer::GetSingleton()->PlayAnimation(plyr, "Take"); // mid
+            }
         }
 }

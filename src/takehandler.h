@@ -24,13 +24,14 @@ namespace AnimatedInteractions
             usedAnimObjects.emplace(FormUtil::Form::GetFormFromMod("Animated Interactions.esp", 0x2E10D)->As<TESObjectANIO>());
         }
 
-        
+        static void HandlePickUpPlayer(RE::TESObjectREFR *ref);
 
     private:
 
 
         static NiNode* GetAttachNode(NiAVObject* animObjectMesh);
 
+        
 
         static int32_t ConstructNiStream(char* address, void* memory, void* num); 
         static void DestructNiStream(NiStream* niStream);
