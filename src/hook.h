@@ -39,7 +39,7 @@ namespace AnimatedInteractions
         static inline float desired_angle_z = 0.0f; 
 
         static inline float last_angle_z = 0.0f; 
-        static inline float rotate_z_mult = 1.0f;
+        static inline float rotate_z_speed_mult = 1.0f;
 
         static inline std::atomic should_interp = false;
 
@@ -99,7 +99,7 @@ namespace AnimatedInteractions
         private:
         static bool ActivateRef(TESObjectREFR* a_ref, TESObjectREFR* a_activate_trigger, uint8_t a_arg2, TESBoundObject* a_object, int32_t a_count, bool a_defaultProcessingOnly);
         static inline REL::Relocation<decltype(ActivateRef)> _ActivateRef; 
-
+        static inline std::atomic is_activating{ false };
         struct Activation
         {
             TESObjectREFR* ref = nullptr; 
@@ -167,7 +167,6 @@ namespace AnimatedInteractions
         }
 
     private:
-        
 
         static RE::NiAVObject* LoadAnimObject(RE::TESModel* a_model, RE::BIPED_OBJECT a_bipedObj, RE::TESObjectREFR* a_actor, RE::BSTSmartPointer<RE::BipedAnim>& a_biped, RE::NiAVObject* a_root);
         

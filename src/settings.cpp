@@ -18,11 +18,17 @@ public:
 
 	struct Animation
     {
+		bool BlocksActivation = false;
         double AnimationSpeed = 1.0;
 		double HighThreshold = -35.0;
 		double LowThreshold = -115.0;
 
     };
+
+	struct Rotation 
+	{
+		double RotationSpeed = 10.0;
+	};
 
 	struct Camera
 	{
@@ -38,39 +44,20 @@ public:
 		ini.SetUnicode();
 		
 		ini.LoadFile(path);
+		animation.BlocksActivation = ini.GetBoolValue("Animation", "AnimationBlocksActivate", false);
 		animation.AnimationSpeed= ini.GetDoubleValue("Animation", "AnimationSpeedMultiplier", 1.0);
 		animation.HighThreshold = ini.GetDoubleValue("Animation", "TakeHighThreshold", 50.0);
 		animation.LowThreshold = ini.GetDoubleValue("Animation", "TakeLowThreshold", -50.0);
 		camera.ForceThirdPerson = ini.GetBoolValue("Camera", "ForceThirdPerson", false); 
-
-
-        SKSE::log::info("Settings loaded. Animation speed {} ", animation.AnimationSpeed);
-		std::list<CSimpleIniA::Entry> Sections;
-		ini.GetAllSections(Sections);
-		// weather.SnowVisionAngleDegrees = ini.GetLongValue("Weather", "SnowVisionAngleDegrees");
-		// weather.RainSoundLevelMultiplier = ini.GetLongValue("Weather", "RainSoundLevelMultiplier");
-		
-		// crosshair.mode = ini.GetLongValue("Crosshair", "Mode");
-		// crosshair.min = ini.GetDoubleValue("Crosshair", "OpacityMin", 0.0);
-		// crosshair.max = ini.GetDoubleValue("Crosshair", "OpacityMax", 100.0);
-
-		// sneakMeter.mode = ini.GetLongValue("SneakMeter", "Mode");
-		// sneakMeter.min = ini.GetDoubleValue("SneakMeter", "OpacityMin", 0.0);
-		// sneakMeter.max = ini.GetDoubleValue("SneakMeter", "OpacityMax", 90.0);
-		// sneakMeter.range = ini.GetDoubleValue("SneakMeter", "PulseRange", 0.05);
-		// sneakMeter.frequency = ini.GetDoubleValue("SneakMeter", "PulseFrequency", 0.05);
-
-		// spells.mode = ini.GetLongValue("Spells", "Mode");
-
-		// fade.time = ini.GetDoubleValue("Fade", "Multiplier", 1.0);
-
-		// smoothCam.mode = ini.GetLongValue("SmoothCam", "Mode");
+		rotation.RotationSpeed = ini.GetDoubleValue("Rotation", "RotationSpeedMultiplier", 10.0f);
 	
 	}
+	[[nodiscard]] bool GetAnimationBlockActivation() const { return animation.BlocksActivation; }	
     [[nodiscard]] double GetAnimationSpeed() const { return animation.AnimationSpeed; }
 	[[nodiscard]] double GetHighTakeBound() const { return animation.HighThreshold; }
 	[[nodiscard]] double GetLowTakeBound() const { return animation.LowThreshold; }
 	[[nodiscard]] bool GetForceThirdPerson() const { return camera.ForceThirdPerson; }
+	[[nodiscard]] double GetRotationSpeed() const { return rotation.RotationSpeed; }
 	// [[nodiscard]] int GetCrosshairMode() const { return crosshair.mode; }
 
 
@@ -79,6 +66,7 @@ private:
 
     Animation animation;
 	Camera camera; 
+	Rotation rotation;
 
 	Settings() = default;
 	Settings(const Settings&) = delete;

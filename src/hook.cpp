@@ -178,7 +178,7 @@ namespace AnimatedInteractions
             return;
         }
         float angle_delta = MathUtil::Angle::NormalRelativeAngle(desired_angle_z - a_player->data.angle.z);
-        float max_angle_delta = 10.0f * *delta_time_ptr;
+        float max_angle_delta = rotate_z_speed_mult * *delta_time_ptr;
 
         angle_delta = MathUtil::Angle::ClipAngle(angle_delta, -max_angle_delta, max_angle_delta);
         float camera_angle = third_person_state->freeRotation.x;
@@ -275,13 +275,7 @@ namespace AnimatedInteractions
             return;
         }
         should_interp.store(true);
-        float diff_angle_z = desired_angle_z - strt_angle_z;
-        rotate_z_mult = 1.f;
-        while (diff_angle_z > PI)
-        {
-            rotate_z_mult = -rotate_z_mult;
-            diff_angle_z -= PI;
-        }
+        rotate_z_speed_mult = Settings::GetSingleton()->GetRotationSpeed();
         desired_angle_z = end_angle_z;
     }
     void PlayerUpdateHook::QueueAnimationPostRotate(std::string a_name)
@@ -298,6 +292,10 @@ namespace AnimatedInteractions
         // {
         //     SKSE::log::info("Trigger {}", a_activate_trigger->GetName());
         // }
+        if (is_activating && Settings::GetSingleton()->GetAnimationBlockActivation())
+        {
+            return false;
+        }
         if (!a_ref || !a_activate_trigger) 
         {
             return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
@@ -332,6 +330,7 @@ namespace AnimatedInteractions
             default:
                 TakeHandler::StoreReferenceMesh(a_ref);
                 TakeHandler::HandlePickUp(a_ref);
+                is_activating.store(true);
                 // current_activation = Activation();
                 // return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
         }
