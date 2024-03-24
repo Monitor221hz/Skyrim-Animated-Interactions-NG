@@ -5,6 +5,14 @@ cmake_minimum_required(VERSION 3.21)
 # Set your project name. This will be the name of your SKSE .dll file.
 project(AnimatedInteractions VERSION 0.0.1 LANGUAGES CXX)
 
+# name of mod folder
+set (MOD_NAME "Animated Interactions SKSE")
+
+# only for nemesis based mods
+set (MOD_CODE "anmint")
+
+# name of config folder within output folder
+set (OUTPUT_CONFIG_FOLDER "Animated_Interactions")
 #
 # YOU DO NOT NEED TO EDIT ANYTHING BELOW HERE
 #
@@ -26,7 +34,7 @@ endif()
 # To do this automatically, set the `SKYRIM_MODS_FOLDER` environment variable
 # to the path of your "mods" folder
 if(DEFINED ENV{SKYRIM_MODS_FOLDER} AND IS_DIRECTORY "$ENV{SKYRIM_MODS_FOLDER}")
-    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/Animated Interactions SKSE")
+    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/${MOD_NAME}")
 endif()
 
 # Otherwise, you can set OUTPUT_FOLDER to any place you'd like :)
@@ -56,6 +64,12 @@ if(DEFINED OUTPUT_FOLDER)
     # Copy the SKSE plugin .dll files into the SKSE/Plugins/ folder
     set(DLL_FOLDER "${OUTPUT_FOLDER}/SKSE/Plugins")
     set (CHAR_ANIMS_FOLDER "meshes/actors/character/animations")
+    set (NEMESIS_FOLDER "Nemesis_Engine/mod/${MOD_CODE}")
+
+    set(SRC_CONFIG_FOLDER "${CMAKE_SOURCE_DIR}/config")
+    set(SRC_CHAR_ANIMS_FOLDER "${CMAKE_SOURCE_DIR}/${CHAR_ANIMS_FOLDER}")
+    set (SRC_NEMESIS_FOLDER "${CMAKE_SOURCE_DIR}/${NEMESIS_FOLDER}")
+
     message(STATUS "SKSE plugin output folder: ${DLL_FOLDER}")
 
     add_custom_command(
@@ -65,20 +79,33 @@ if(DEFINED OUTPUT_FOLDER)
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${DLL_FOLDER}/$<TARGET_FILE_NAME:${PROJECT_NAME}>"
         VERBATIM
     )
-
+if (EXISTS "${SRC_CONFIG_FOLDER}")
     add_custom_command(
         TARGET "${PROJECT_NAME}"
         POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/config" "${DLL_FOLDER}/Animated_Interactions"
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/config" "${DLL_FOLDER}/${CONFIG_FOLDER}"
         VERBATIM
     )
+endif()
 
+if (EXISTS "${SRC_CHAR_ANIMS_FOLDER}")
     add_custom_command(
         TARGET "${PROJECT_NAME}"
         POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/${CHAR_ANIMS_FOLDER}" "${OUTPUT_FOLDER}/${CHAR_ANIMS_FOLDER}"
         VERBATIM
     )
+endif()
+
+if (EXISTS "${SRC_NEMESIS_FOLDER}")
+    add_custom_command(
+        TARGET "${PROJECT_NAME}"
+        POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E remove_directory "${OUTPUT_FOLDER}/${NEMESIS_FOLDER}"
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/${NEMESIS_FOLDER}" "${OUTPUT_FOLDER}/${NEMESIS_FOLDER}"
+        VERBATIM
+    )
+endif()
 
     # If you perform a "Debug" build, also copy .pdb file (for debug symbols)
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
