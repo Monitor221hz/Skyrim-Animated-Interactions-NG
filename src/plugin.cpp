@@ -43,8 +43,10 @@ SKSEPluginLoad(const SKSE::LoadInterface *skse) {
 	if (!messaging->RegisterListener("SKSE", MessageHandler)) {
 		return false;
 	}
-	AnimatedInteractions::Hook::InstallHooks();
+	AnimatedInteractions::AnimObjectHook::Install();
 	AnimatedInteractions::InputHook::Install();
+	AnimatedInteractions::PlayerActivateHook::Install();
+	AnimatedInteractions::PlayerGraphEventHook::Install();
 	
 	// AnimatedInteractions::PlayerPickUpHook::Install();
 	AnimatedInteractions::PlayerUpdateHook::Install();

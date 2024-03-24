@@ -4,39 +4,6 @@
 namespace AnimatedInteractions
 {
 
-    void InputHook::HandlePickUp(RE::TESObjectREFR *ref)
-    {
-        bool idlePlaying = false;
-        auto *plyr = RE::PlayerCharacter::GetSingleton();
-        auto *settings = Settings::GetSingleton();
-        plyr->GetGraphVariableBool("bForceIdleStop", idlePlaying);
-
-        if (idlePlaying)
-            return;
-
-        auto dif = ref->GetPositionZ() - plyr->GetPositionZ() - 64.0;
-        auto* anim_plyr = AnimPlayer::GetSingleton();
-
-        SKSE::log::info("Player Object Diff: {}", dif);
-        if (dif > settings->GetHighTakeBound())
-        {
-            // PlayerUpdateHook::QueueAnimationInterpEnd("TakeHigh");
-            anim_plyr->PlayAnimation("TakeHigh");
-        }
-        else if (dif < settings->GetLowTakeBound())
-        {
-            // PlayerUpdateHook::QueueAnimationInterpEnd("TakeLow");
-            anim_plyr->PlayAnimation("TakeLow");
-        }
-        else
-        {
-            // PlayerUpdateHook::QueueAnimationInterpEnd("Take");
-            anim_plyr->PlayAnimation("Take");
-        }
-        
-    }
-
-
 
     void InputHook::ProcessButton(RE::ActivateHandler *a_this, ButtonEvent *a_event, PlayerControlsData *a_data)
     {
@@ -83,23 +50,21 @@ namespace AnimatedInteractions
 
         // if (target->IsDead())animplyr->PlayAnimation("SearchKneel");
     }
-    void InputHook::FaceObject(TESObjectREFR* refr)
+    void PlayerUpdateHook::FaceObject(TESObjectREFR* refr)
     {
         auto* plyr = PlayerCharacter::GetSingleton(); 
         if (!plyr) { return; }
-        auto* playerCamera = RE::PlayerCamera::GetSingleton();
-        if (!playerCamera) { return; }
-        auto thirdPersonState = static_cast<RE::ThirdPersonState*>(playerCamera->currentState.get());
-        if (!thirdPersonState) { return; }
 
-        float headingAngle =MathUtil::Angle::DegreeToRadian(plyr->GetHeadingAngle(refr->GetPosition(), true));
+        float headingAngle = MathUtil::Angle::DegreeToRadian(plyr->GetHeadingAngle(refr->GetPosition(), false));
         float plyr_angle = plyr->GetAngleZ();
-        // float newAngle = plyr->GetAngleZ() + headingAngle ; //radians
-        float new_angle = MathUtil::Angle::NormalAbsoluteAngle(plyr_angle + headingAngle);
-        float new_camera_angle = MathUtil::Angle::NormalAbsoluteAngle(thirdPersonState->freeRotation.x - headingAngle);
+
+        float new_angle = plyr_angle + headingAngle;
+
+        new_angle = MathUtil::Angle::NormalAbsoluteAngle(new_angle);
+
         SKSE::log::info("Player | Original Angle: {} | Heading Angle: {} | New Angle: {}", MathUtil::Angle::RadianToDegree(plyr_angle), MathUtil::Angle::RadianToDegree(headingAngle), MathUtil::Angle::RadianToDegree(new_angle));
-        
-        PlayerUpdateHook::QueueRotationZ(new_angle, new_camera_angle);
+       
+        QueueRotationZ(plyr_angle, new_angle);
     }
     void InputHook::HandleObjectPress(RE::NiPointer<RE::TESObjectREFR> refr)
     {
@@ -113,19 +78,12 @@ namespace AnimatedInteractions
         switch (base->GetFormType())
         {
         case FormType::Door:
-            animplyr->PlayAnimation("UseDoor");
-            FaceObject(ref); 
-
             break;
         case FormType::Container:
-            animplyr->PlayAnimation("SearchChest");
-            FaceObject(ref); 
             break;
         case FormType::Activator:
-            FaceObject(ref); 
             break;
         case FormType::TalkingActivator:
-            FaceObject(ref); 
             break;
         case FormType::NPC:
             break;
@@ -134,14 +92,14 @@ namespace AnimatedInteractions
         case FormType::MovableStatic:
             break;
         case FormType::Furniture:
-            FaceObject(ref); 
             break; 
         case FormType::PlacedHazard:
             break;
         default:
-            TakeHandler::StoreReferenceMesh(refr.get());
-            HandlePickUp(refr.get());
-            FaceObject(ref);
+            // auto* ref = refr.get();
+            // TakeHandler::StoreReferenceMesh(ref);
+            // HandlePickUp(ref);
+            // PlayerUpdateHook::FaceObject(ref);
             break;
         }
     }
@@ -169,7 +127,7 @@ namespace AnimatedInteractions
             
     }
 
-    RE::NiAVObject *Hook::LoadAnimObject(RE::TESModel *a_model, RE::BIPED_OBJECT a_bipedObj, RE::TESObjectREFR *a_actor, RE::BSTSmartPointer<RE::BipedAnim> &a_biped, RE::NiAVObject *a_root)
+    RE::NiAVObject *AnimObjectHook::LoadAnimObject(RE::TESModel *a_model, RE::BIPED_OBJECT a_bipedObj, RE::TESObjectREFR *a_actor, RE::BSTSmartPointer<RE::BipedAnim> &a_biped, RE::NiAVObject *a_root)
     {
         RE::TESModel *model = a_model;
         NiAVObject* output = _LoadAnimObject(model, a_bipedObj, a_actor, a_biped, a_root); 
@@ -193,11 +151,11 @@ namespace AnimatedInteractions
     }
     void PlayerPickUpHook::PickUpItem(Actor *a_actor, TESObjectREFR *a_ref, std::int32_t a_count, bool a_arg3, bool a_playSound)
     {
-        if (a_actor && a_ref)
-        {
-            TakeHandler::StoreReferenceMesh(a_ref);
-            TakeHandler::HandlePickUpPlayer(a_ref);
-        }
+        // if (a_actor && a_ref)
+        // {
+        //     TakeHandler::StoreReferenceMesh(a_ref);
+        //     TakeHandler::HandlePickUpPlayer(a_ref);
+        // }
         _PickUpItem(a_actor, a_ref, a_count, a_arg3, a_playSound);
     }
     void PlayerUpdateHook::UpdatePlayer(RE::Actor *a_player, float a_delta)
@@ -207,7 +165,7 @@ namespace AnimatedInteractions
         {
             return;
         }
-        float player_angle = a_player->GetAngleZ();
+        float player_angle = a_player->data.angle.z;
         auto *player_camera = RE::PlayerCamera::GetSingleton();
         if (!player_camera)
         {
@@ -219,61 +177,189 @@ namespace AnimatedInteractions
         {
             return;
         }
+        float angle_delta = MathUtil::Angle::NormalRelativeAngle(desired_angle_z - a_player->data.angle.z);
+        float max_angle_delta = 10.0f * *delta_time_ptr;
 
+        angle_delta = MathUtil::Angle::ClipAngle(angle_delta, -max_angle_delta, max_angle_delta);
         float camera_angle = third_person_state->freeRotation.x;
-
-
-        float player_delta_time = *delta_time;
-        player_angle = MathUtil::Interp::InterpTo(player_angle, desired_angle_z, player_delta_time, 10.0f);
-        camera_angle = MathUtil::Interp::InterpTo(camera_angle, cam_desired_angle_z, player_delta_time, 10.0f);
         
-        third_person_state->freeRotation.x = camera_angle;
+        player_angle = player_angle + angle_delta;
+
         a_player->SetRotationZ(player_angle);
+        third_person_state->freeRotation.x = MathUtil::Angle::NormalRelativeAngle(camera_angle - angle_delta);
+        
 
-
-        if (round(player_angle*10.0f)/10.0f == round(desired_angle_z*10.0f)/10.0f || last_angle == player_angle)
+        if (round(player_angle*10.0f)/10.0f == round(desired_angle_z*10.0f)/10.0f || last_angle_z == player_angle)
         {
             SetTurnState(a_player, 1);
-            PlayQueuedAnimation();
+            PlayQueuedAnimationTask();
             should_interp.store(false);
+            // SKSE::log::info("last_angle {} | player_angle {} | o_delta {}", MathUtil::Angle::RadianToDegree(last_angle_z), MathUtil::Angle::RadianToDegree(player_angle), o_delta);
             return; 
         }
 
 
 
-        last_angle = a_player->GetAngleZ();
+        last_angle_z = player_angle;
 
-        SetTurnState(a_player, player_angle > last_angle ? 0 : 2);
+        if (angle_delta * angle_delta < FLT_EPSILON)
+        {
+            desired_angle_z = -1.f;
+        }
+        SetTurnState(a_player, angle_delta  ? 0 : 2);
 
     }
 
     void PlayerUpdateHook::SetTurnState(Actor* a_actor, int turn_state)
     {
-        auto* fixed_strings = FixedStrings::GetSingleton();
-        if (!fixed_strings) { return; }
+        // auto* fixed_strings = FixedStrings::GetSingleton();
+        // if (!fixed_strings) { return; }
 
-        
-        a_actor->SetGraphVariableInt(fixed_strings->iSyncTurnState, turn_state);
+        // a_actor->SetGraphVariableInt(fixed_strings->iSyncTurnState, turn_state);
+        SKSE::GetTaskInterface()->AddTask([a_actor, turn_state]()
+        {
+            a_actor->SetGraphVariableInt("iSyncTurnState",turn_state);
+        });
+    }
+    void PlayerUpdateHook::PlayQueuedAnimationTask()
+    {
+        SKSE::GetTaskInterface()->AddTask([]() { PlayerUpdateHook::PlayQueuedAnimation(); }); 
     }
     void PlayerUpdateHook::PlayQueuedAnimation()
     {
         if (animation_queue.empty()) { return; }
+        // std::this_thread::sleep_for(std::chrono::milliseconds(100));
         auto* anim_player = AnimPlayer::GetSingleton();
         anim_player->PlayAnimation(animation_queue.front());
-        // animation_queue.pop();
+        animation_queue.pop();
     }
-    void PlayerUpdateHook::QueueRotationZ(float angle_z, float cam_angle_z)
+    float PlayerUpdateHook::InterpAngleZ(float a_current, float a_interpSpeed, float &o_delta)
+    {
+        o_delta = 0.f;
+        float target = desired_angle_z;
+        float delta_time = *delta_time_ptr;
+        if (a_interpSpeed <= 0.f)
+        {
+            return desired_angle_z;
+        }
+        
+        const float clockwise_distance = target - a_current;
+        const float counterclockwise_distance = target + a_current;
+
+        float final_distance= 0.f;
+
+        if (MathUtil::Angle::NormalAbsoluteAngle(counterclockwise_distance) < MathUtil::Angle::NormalAbsoluteAngle(clockwise_distance))
+        {
+            // final_distance = -counterclockwise_distance;
+            float end_angle = a_current > PI ? 2 * PI + 0.1f : 0.1f;
+            final_distance = end_angle - a_current;
+        }
+        else 
+        {
+            final_distance = clockwise_distance;
+        }
+
+        if (final_distance * final_distance < FLT_EPSILON)
+        {
+            return desired_angle_z;
+        }
+
+        o_delta = final_distance * MathUtil::Clamp(delta_time * a_interpSpeed, 0.f, 1.f);
+
+        return MathUtil::Angle::NormalAbsoluteAngle(a_current + o_delta);
+    }
+    void PlayerUpdateHook::QueueRotationZ(float strt_angle_z, float end_angle_z)
     {
         if (should_interp)
         {
             return;
         }
         should_interp.store(true);
-        desired_angle_z = angle_z;
-        cam_desired_angle_z = cam_angle_z;
+        float diff_angle_z = desired_angle_z - strt_angle_z;
+        rotate_z_mult = 1.f;
+        while (diff_angle_z > PI)
+        {
+            rotate_z_mult = -rotate_z_mult;
+            diff_angle_z -= PI;
+        }
+        desired_angle_z = end_angle_z;
     }
-    void PlayerUpdateHook::QueueAnimationInterpEnd(std::string a_name)
+    void PlayerUpdateHook::QueueAnimationPostRotate(std::string a_name)
     {
         animation_queue.emplace(a_name);
+    }
+    bool PlayerActivateHook::ActivateRef(TESObjectREFR* a_ref, TESObjectREFR *a_activate_trigger, uint8_t a_arg2, TESBoundObject *a_object, int32_t a_count, bool a_defaultProcessingOnly)
+    {
+        // if (a_ref)
+        // {
+        //     SKSE::log::info("Ref {}", a_ref->GetName());
+        // }
+        // if (a_activate_trigger)
+        // {
+        //     SKSE::log::info("Trigger {}", a_activate_trigger->GetName());
+        // }
+        if (!a_ref || !a_activate_trigger) 
+        {
+            return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+        }
+        current_activation = Activation(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+        auto* base = a_ref->GetBaseObject();
+        switch(base->GetFormType())
+        {
+            case FormType::Door:
+                PlayerUpdateHook::QueueAnimationPostRotate("UseDoor");
+                break;
+            case FormType::Container:
+                PlayerUpdateHook::QueueAnimationPostRotate("SearchChest");
+                break;
+            case FormType::ActorCharacter:
+                PlayerUpdateHook::QueueAnimationPostRotate("SearchKneel");
+                break;
+            case FormType::Activator:
+                break;
+            case FormType::TalkingActivator:
+                break;
+            case FormType::NPC:
+                break;
+            case FormType::Static:
+                break;
+            case FormType::MovableStatic:
+                break;
+            case FormType::Furniture:
+                break;
+            case FormType::PlacedHazard:
+                break;
+            default:
+                TakeHandler::StoreReferenceMesh(a_ref);
+                TakeHandler::HandlePickUp(a_ref);
+                // current_activation = Activation();
+                // return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+        }
+        PlayerGraphEventHook::ActivateCallback();
+        PlayerUpdateHook::FaceObject(a_ref);
+        // AnimPlayer::GetSingleton()->PlayAnimation("")
+        return true;
+    }
+    void PlayerActivateHook::TriggerStored()
+    {
+        if (current_activation.ref == nullptr) { return; }
+        current_activation.ref->ActivateRef(current_activation.activate_trigger, current_activation.arg2, current_activation.bound_object, current_activation.count, current_activation.default_processing_only);
+        current_activation = Activation();
+    }
+    void PlayerGraphEventHook::ActivateCallback()
+    {
+        is_active.store(true);
+    }
+    EventResult PlayerGraphEventHook::ProcessEvent(RE::BSTEventSink<RE::BSAnimationGraphEvent> *a_sink, RE::BSAnimationGraphEvent *a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent> *a_eventSource)
+    {
+        if (!is_active || a_event->tag != "InteractEnd") 
+        { 
+            // SKSE::log::info("Event {}", a_event->tag);
+            return _ProcessEvent(a_sink, a_event, a_eventSource);
+        }
+        // SKSE::log::info("Event {}", a_event->tag);
+        PlayerActivateHook::TriggerStored();
+        is_active.store(false);
+        return _ProcessEvent(a_sink, a_event, a_eventSource);
     }
 }

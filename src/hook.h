@@ -33,21 +33,23 @@ namespace AnimatedInteractions
         static void UpdatePlayer(RE::Actor *a_this, float a_delta);
         static inline REL::Relocation<decltype(UpdatePlayer)> _UpdatePlayer;
 
-        static inline float* delta_time = nullptr;
-
+        static inline float* delta_time_ptr = nullptr;
+        
+        static inline float start_angle_z = 0.0f;
         static inline float desired_angle_z = 0.0f; 
-        static inline float cam_desired_angle_z = 0.0f; 
 
-        static inline float last_angle = 0.0f; 
-
+        static inline float last_angle_z = 0.0f; 
+        static inline float rotate_z_mult = 1.0f;
 
         static inline std::atomic should_interp = false;
 
         static inline std::queue<std::string> animation_queue; 
 
         static void SetTurnState(Actor* a_actor, int turn_state);
+
+        static void PlayQueuedAnimationTask();
         static void PlayQueuedAnimation();
-        
+        static float InterpAngleZ(float a_current, float a_interpSpeed, float& o_delta);
         public:
         static void Install()
         {
@@ -61,10 +63,11 @@ namespace AnimatedInteractions
         }
         static void Load()
         {
-            delta_time = (float*)RELOCATION_ID(523660, 410199).address();
+            delta_time_ptr = (float*)RELOCATION_ID(523660, 410199).address();
         }
-        static void QueueRotationZ(float angle_z, float cam_angle_z);
-        static void QueueAnimationInterpEnd(std::string a_name);
+        static void FaceObject(TESObjectREFR* refr);
+        static void QueueRotationZ(float strt_angle_z, float end_angle_z);
+        static void QueueAnimationPostRotate(std::string a_name);
 
         
         
@@ -81,7 +84,7 @@ namespace AnimatedInteractions
             static void HandlePickUp(RE::TESObjectREFR *ref);
             static void ProcessButton(RE::ActivateHandler *a_this, ButtonEvent *a_event, PlayerControlsData *a_data);
             static inline REL::Relocation<decltype(ProcessButton)> _ProcessButton;
-            static void FaceObject(TESObjectREFR* refr);
+
             static inline std::atomic can_listen = true;
         public:
         static void Install()
@@ -91,26 +94,69 @@ namespace AnimatedInteractions
             SKSE::log::info("Hook: Button Input installed");
         }
     };
-    class Hook
+    class PlayerActivateHook
+    {
+        private:
+        static bool ActivateRef(TESObjectREFR* a_ref, TESObjectREFR* a_activate_trigger, uint8_t a_arg2, TESBoundObject* a_object, int32_t a_count, bool a_defaultProcessingOnly);
+        static inline REL::Relocation<decltype(ActivateRef)> _ActivateRef; 
+
+        struct Activation
+        {
+            TESObjectREFR* ref = nullptr; 
+            TESObjectREFR* activate_trigger = nullptr; 
+            uint8_t arg2 = 0; 
+            TESBoundObject* bound_object = nullptr; 
+            int32_t count = 0;
+            bool default_processing_only = false;
+            Activation() {}
+            Activation(TESObjectREFR* a_ref, TESObjectREFR* a_activate_trigger, uint8_t a_arg2, TESBoundObject* a_object, int32_t a_count, bool a_default_processing_only) :
+            ref(a_ref), activate_trigger(a_activate_trigger), arg2(a_arg2), bound_object(a_object), count(a_count), default_processing_only(a_default_processing_only) {}
+        };
+
+        static inline Activation current_activation; 
+        public:
+        static void TriggerStored();
+        static void Install()
+        {
+            //	p	TESObjectREFR__Activate_140296C00+9D	call    TESObjectREFR__Activate_140296C00 X
+            //	p	TESObjectREFR__sub_1402A8CC0+D0	call    TESObjectREFR__Activate_140296C00 X
+            //Up	p	TESObjectCONT__Activate_14022B6D0+164	call    TESObjectREFR__Activate_140296C00 17485 X 
+            //	p	TESObjectREFR__sub_1402A8E20+D3	call    TESObjectREFR__Activate_140296C00 19858 X 
+            //	p	PlayerCharacter__sub_1405E3700+98	call    TESObjectREFR__Activate_140296C00 36496 X 
+            //	p	Character__sub_140602410+1E6	call    TESObjectREFR__Activate_140296C00 36854 X (NPC interact) 
+            // Down	p	PlayerCharacter__sub_1406A9F90+135	call    TESObjectREFR__Activate_140296C00 39471
+            auto& trampoline = SKSE::GetTrampoline(); 
+            SKSE::AllocTrampoline(14);
+            REL::Relocation<std::uintptr_t> target{ REL::RelocationID(39471, 0x0), REL::Relocate(0x135, 0x0)}; 
+            _ActivateRef = trampoline.write_call<5>(target.address(), ActivateRef);
+
+            SKSE::log::info("Activate Hook installed");
+        }
+    };
+    using EventResult = RE::BSEventNotifyControl;
+    class PlayerGraphEventHook
     {
     public:
-        static void InstallPickUpHook()
+        static void Install()
         {
-            SKSE::log::info("Installing Hook: Pick Up");
-
-            REL::Relocation<std::uintptr_t> characterVtbl{VTABLE_Character[0]}; 
-
-            // auto &trampoline = SKSE::GetTrampoline();
-            // SKSE::AllocTrampoline(16);
-            // REL::Relocation<std::uintptr_t> target{REL::RelocationID(39456, 0), REL::Relocate(0x5FA, 0)};
-            // _PickUp = trampoline.write_call<5>(target.address(), PickUp);
-
-            SKSE::log::info("Hook: Pick up installed");
+            REL::Relocation<uintptr_t> AnimEventVtbl_PC{RE::VTABLE_PlayerCharacter[2]};
+            _ProcessEvent = AnimEventVtbl_PC.write_vfunc(0x1, ProcessEvent);
+            SKSE::log::info("Hook Installed: Player Graph Event");
         }
-        // Down	p	PlayerCharacter__sub_1405E3700+98	call    TESObjectREFR__Activate_140296C00
 
+        static void ActivateCallback();
 
-        static void InstallAnimObjectHook()
+    private:
+        static EventResult ProcessEvent(RE::BSTEventSink<RE::BSAnimationGraphEvent> *a_sink, RE::BSAnimationGraphEvent *a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent> *a_eventSource);
+        static inline REL::Relocation<decltype(ProcessEvent)> _ProcessEvent;
+
+        static inline std::atomic is_active { false }; 
+    };
+    
+    class AnimObjectHook
+    {
+    public:
+        static void Install()
         {
             auto& trampoline = SKSE::GetTrampoline();
             SKSE::AllocTrampoline(14);
@@ -118,30 +164,6 @@ namespace AnimatedInteractions
 		    _LoadAnimObject = trampoline.write_call<5>(target.address(), LoadAnimObject); 
 
             SKSE::log::info("Hook AnimObject installed"); 
-        }
-
-        static void InstallHooks()
-        {
-            // InstallStealHook();
-            // InstallLootHook();
-            InstallAnimObjectHook(); 
-            // InstallPickUpHook();
-            // PlayerCharacter__PickUpObject_1406A5300+4B7	call    TESObjectREFR__sub_14028D880
-
-            // SKSE::log::info("Doors hooked");
-            SKSE::log::info("Hooks installed");
-
-            // steal
-            // REL (39456,40533)
-            // SE PlayerCharacter__PickUpObject_1406A5300+2C6	call    TESObjectREFR__sub_14069FE60
-            // AE sub_1406CD770+2C8	call    sub_1406C8580
-
-            // pickup
-            // REL (50007,50951)
-            // SE sub_1408528D0+13F	call    TESObjectREFR__sub_14069FE60
-            // AE sub_14087F4A0+13F	call    sub_1406C8580
-
-            //	p	PlayerCharacter__PickUpObject_1406A5300+5FA	call    TESObjectREFR__RemoveReferenceHavokData
         }
 
     private:

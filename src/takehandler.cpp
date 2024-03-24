@@ -1,7 +1,39 @@
 #include "takehandler.h"
 #include "anim.h"
+#include "hook.h"
 namespace AnimatedInteractions
 {
+       void TakeHandler::HandlePickUp(RE::TESObjectREFR *ref)
+    {
+        bool idlePlaying = false;
+        auto *plyr = RE::PlayerCharacter::GetSingleton();
+        auto *settings = Settings::GetSingleton();
+        plyr->GetGraphVariableBool("bForceIdleStop", idlePlaying);
+
+        if (idlePlaying)
+            return;
+
+        auto dif = ref->GetPositionZ() - plyr->GetPositionZ() - 64.0;
+        auto* anim_plyr = AnimPlayer::GetSingleton();
+
+        SKSE::log::info("Player Object Diff: {}", dif);
+        if (dif > settings->GetHighTakeBound())
+        {
+            PlayerUpdateHook::QueueAnimationPostRotate("TakeHigh");
+            // anim_plyr->PlayAnimation("TakeHigh");
+        }
+        else if (dif < settings->GetLowTakeBound())
+        {
+            PlayerUpdateHook::QueueAnimationPostRotate("TakeLow");
+            // anim_plyr->PlayAnimation("TakeLow");
+        }
+        else
+        {
+            PlayerUpdateHook::QueueAnimationPostRotate("Take");
+            // anim_plyr->PlayAnimation("Take");
+        }
+        
+    }
     void TakeHandler::StoreReferenceMesh(TESObjectREFR *refr)
         {
              WriteLocker locker(itemLock);
@@ -77,30 +109,5 @@ namespace AnimatedInteractions
             return (usedAnimObjects.count(animObject) > 0);
         }
 
-        void TakeHandler::HandlePickUpPlayer(RE::TESObjectREFR *ref)
-        {
-            bool idlePlaying = false;
-            auto *plyr = RE::PlayerCharacter::GetSingleton();
-            auto *settings = Settings::GetSingleton();
-            plyr->GetGraphVariableBool("bForceIdleStop", idlePlaying);
 
-            if (idlePlaying)
-                return;
-
-            auto dif = ref->GetPositionZ() - plyr->GetPositionZ() - 64.0;
-
-            SKSE::log::info("Player Object Diff: {}", dif);
-            if (dif > settings->GetHighTakeBound())
-            {
-                AnimPlayer::GetSingleton()->PlayAnimation(plyr, "TakeHigh"); // high
-            }
-            else if (dif < settings->GetLowTakeBound())
-            {
-                AnimPlayer::GetSingleton()->PlayAnimation(plyr, "TakeLow"); // low
-            }
-            else
-            {
-                AnimPlayer::GetSingleton()->PlayAnimation(plyr, "Take"); // mid
-            }
-        }
 }

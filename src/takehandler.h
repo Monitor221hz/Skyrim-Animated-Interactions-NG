@@ -24,8 +24,7 @@ namespace AnimatedInteractions
             usedAnimObjects.emplace(FormUtil::Form::GetFormFromMod("Animated Interactions.esp", 0x2E10D)->As<TESObjectANIO>());
         }
 
-        static void HandlePickUpPlayer(RE::TESObjectREFR *ref);
-
+        static void HandlePickUp(RE::TESObjectREFR *ref);
     private:
 
 

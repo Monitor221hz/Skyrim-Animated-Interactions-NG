@@ -253,6 +253,25 @@ namespace MathUtil
 
             // return fmod(a_angle, TWO_PI) >= 0 ? (a_angle < PI) ? a_angle : a_angle - TWO_PI : (a_angle >= -PI) ? a_angle : a_angle + TWO_PI;
         }
+
+        static float NormalDifferenceAngle(float a_src_angle, float a_angle)
+        {
+            while (a_src_angle < 0)
+            {
+                a_angle -= TWO_PI;
+                a_src_angle += TWO_PI;
+            }
+            while (a_src_angle > TWO_PI)
+            {
+                a_angle += TWO_PI;
+                a_src_angle -= TWO_PI;
+            }
+            return a_angle;
+        }
+        [[nodiscard]] static inline float ClipAngle(float angle, float min, float max)
+        {
+            return fmin(max, fmax(min, angle));
+        }
     }; 
     struct Interp
     {
@@ -274,6 +293,27 @@ namespace MathUtil
 
             return a_current + delta;
         }
+        [[nodiscard]] static float InterpTo(float a_current, float a_target, float a_deltaTime, float a_interpSpeed, float& o_delta)
+        {
+            o_delta = 0.f;
+            if (a_interpSpeed <= 0.f)
+            {
+                return a_target;
+            }
+
+            const float distance = a_target - a_current;
+
+            if (distance * distance < FLT_EPSILON)
+            {
+                return a_target;
+            }
+
+            o_delta = distance * Clamp(a_deltaTime * a_interpSpeed, 0.f, 1.f);
+
+            return a_current + o_delta;
+        }
+
+
     };
 }
 namespace ObjectUtil
