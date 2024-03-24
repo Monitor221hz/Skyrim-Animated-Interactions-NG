@@ -1,0 +1,83 @@
+		<hkobject name="#4090" class="hkbStateMachine" signature="0x816c1dcb">
+			<hkparam name="variableBindingSet">null</hkparam>
+			<hkparam name="userData">0</hkparam>
+			<hkparam name="name">InteractionObjectBehavior</hkparam>
+			<hkparam name="eventToSendWhenStateOrTransitionChanges">
+				<hkobject>
+					<hkparam name="id">-1</hkparam>
+					<hkparam name="payload">null</hkparam>
+				</hkobject>
+			</hkparam>
+			<hkparam name="startStateChooser">null</hkparam>
+			<hkparam name="startStateId">0</hkparam>
+			<hkparam name="returnToPreviousStateEventId">-1</hkparam>
+			<hkparam name="randomTransitionEventId">-1</hkparam>
+			<hkparam name="transitionToNextHigherStateEventId">-1</hkparam>
+			<hkparam name="transitionToNextLowerStateEventId">-1</hkparam>
+			<hkparam name="syncVariableIndex">-1</hkparam>
+			<hkparam name="wrapAroundStateId">false</hkparam>
+			<hkparam name="maxSimultaneousTransitions">32</hkparam>
+			<hkparam name="startStateMode">START_STATE_MODE_DEFAULT</hkparam>
+			<hkparam name="selfTransitionMode">SELF_TRANSITION_MODE_FORCE_TRANSITION_TO_START_STATE</hkparam>
+			<hkparam name="states" numelements="55">
+				#4406
+				#4403
+				#4399
+				#4395
+				#4392
+				#4389
+				#4386
+				#4383
+				#4381
+				#4376
+				#4371
+				#4368
+				#4366
+				#4364
+				#4361
+				#4357
+				#4354
+				#4351
+				#4347
+				#4344
+				#4297
+				#4291
+				#4288
+				#4285
+				#4282
+				#4279
+				#4277
+				#4275
+				#4271
+				#4268
+				#4263
+				#4260
+				#4257
+				#4253
+				#4250
+				#4247
+				#4244
+				#4241
+				#4237
+				#4234
+				#4231
+				#4226
+				#4223
+				#4220
+				#4217
+				#4215
+				#4193
+				#4171
+				#4157
+				#4146
+				#4137
+				#4130
+				#4127
+				#4107
+				#4091
+<!-- MOD_CODE ~anmint~ OPEN -->
+				#anmint$48
+<!-- CLOSE -->
+			</hkparam>
+			<hkparam name="wildcardTransitions">null</hkparam>
+		</hkobject>

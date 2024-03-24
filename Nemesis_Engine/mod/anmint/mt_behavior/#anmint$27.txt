@@ -1,0 +1,8 @@
+		<hkobject name="#anmint$27" class="hkbStateMachineEventPropertyArray" signature="0xb07b4388">
+			<hkparam name="events" numelements="1">
+				<hkobject>
+					<hkparam name="id">393</hkparam>
+					<hkparam name="payload">#anmint$28</hkparam>
+				</hkobject>
+			</hkparam>
+		</hkobject>

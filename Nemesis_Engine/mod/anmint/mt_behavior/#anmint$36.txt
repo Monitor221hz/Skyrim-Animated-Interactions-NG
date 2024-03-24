@@ -1,0 +1,12 @@
+		<hkobject name="#anmint$36" class="hkbStateMachineStateInfo" signature="0xed7f9d0">
+			<hkparam name="variableBindingSet">null</hkparam>
+			<hkparam name="listeners" numelements="0"></hkparam>
+			<hkparam name="enterNotifyEvents">#anmint$41</hkparam>
+			<hkparam name="exitNotifyEvents">#anmint$40</hkparam>
+			<hkparam name="transitions">null</hkparam>
+			<hkparam name="generator">#anmint$37</hkparam>
+			<hkparam name="name">II_TakeLow</hkparam>
+			<hkparam name="stateId">0</hkparam>
+			<hkparam name="probability">1.000000</hkparam>
+			<hkparam name="enable">true</hkparam>
+		</hkobject>
