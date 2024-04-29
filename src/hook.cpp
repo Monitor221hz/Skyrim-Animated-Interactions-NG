@@ -46,7 +46,7 @@ namespace AnimatedInteractions
         if (!actorBase)
             return;
         SKSE::log::info("Looting Actor: {} :", actorBase->GetName());
-        auto *animplyr = AnimPlayer::GetSingleton();
+
 
         // if (target->IsDead())animplyr->PlayAnimation("SearchKneel");
     }
@@ -64,7 +64,7 @@ namespace AnimatedInteractions
 
         SKSE::log::info("Player | Original Angle: {} | Heading Angle: {} | New Angle: {}", MathUtil::Angle::RadianToDegree(plyr_angle), MathUtil::Angle::RadianToDegree(headingAngle), MathUtil::Angle::RadianToDegree(new_angle));
        
-        QueueRotationZ(plyr_angle, new_angle);
+        QueueRotationZ(new_angle);
     }
     void InputHook::HandleObjectPress(RE::NiPointer<RE::TESObjectREFR> refr)
     {
@@ -73,7 +73,7 @@ namespace AnimatedInteractions
         if (!base)
             return;
         
-        auto *animplyr = AnimPlayer::GetSingleton();
+
 
         switch (base->GetFormType())
         {
@@ -229,8 +229,7 @@ namespace AnimatedInteractions
     {
         if (animation_queue.empty()) { return; }
         // std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        auto* anim_player = AnimPlayer::GetSingleton();
-        anim_player->PlayAnimation(animation_queue.front());
+        PlayerActivateHook::SetActivationState(AnimPlayer::PlayAnimation(animation_queue.front()));
         animation_queue.pop();
     }
     float PlayerUpdateHook::InterpAngleZ(float a_current, float a_interpSpeed, float &o_delta)
@@ -268,14 +267,14 @@ namespace AnimatedInteractions
 
         return MathUtil::Angle::NormalAbsoluteAngle(a_current + o_delta);
     }
-    void PlayerUpdateHook::QueueRotationZ(float strt_angle_z, float end_angle_z)
+    void PlayerUpdateHook::QueueRotationZ(float end_angle_z)
     {
         if (should_interp)
         {
             return;
         }
         should_interp.store(true);
-        rotate_z_speed_mult = Settings::GetSingleton()->GetRotationSpeed();
+        rotate_z_speed_mult = static_cast<float>(Settings::GetSingleton()->GetRotationSpeed());
         desired_angle_z = end_angle_z;
     }
     void PlayerUpdateHook::QueueAnimationPostRotate(std::string a_name)
@@ -292,9 +291,9 @@ namespace AnimatedInteractions
         // {
         //     SKSE::log::info("Trigger {}", a_activate_trigger->GetName());
         // }
-        if (is_activating && Settings::GetSingleton()->GetAnimationBlockActivation())
+        if (is_activating)
         {
-            return false;
+            return Settings::GetSingleton()->GetAnimationBlockActivation() ? false : _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
         }
         if (!a_ref || !a_activate_trigger) 
         {
@@ -318,7 +317,14 @@ namespace AnimatedInteractions
             case FormType::TalkingActivator:
                 break;
             case FormType::NPC:
+            {
+                auto* actor_ref = a_ref->As<RE::Actor>();
+                if (actor_ref->IsDead(true))
+                {
+                    PlayerUpdateHook::QueueAnimationPostRotate("UseKneel");
+                }
                 break;
+            }
             case FormType::Static:
                 break;
             case FormType::MovableStatic:
@@ -330,7 +336,7 @@ namespace AnimatedInteractions
             default:
                 TakeHandler::StoreReferenceMesh(a_ref);
                 TakeHandler::HandlePickUp(a_ref);
-                is_activating.store(true);
+                // is_activating.store(true);
                 // current_activation = Activation();
                 // return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
         }
@@ -344,6 +350,7 @@ namespace AnimatedInteractions
         if (current_activation.ref == nullptr) { return; }
         current_activation.ref->ActivateRef(current_activation.activate_trigger, current_activation.arg2, current_activation.bound_object, current_activation.count, current_activation.default_processing_only);
         current_activation = Activation();
+        is_activating.store(false);
     }
     void PlayerGraphEventHook::ActivateCallback()
     {
@@ -351,13 +358,24 @@ namespace AnimatedInteractions
     }
     EventResult PlayerGraphEventHook::ProcessEvent(RE::BSTEventSink<RE::BSAnimationGraphEvent> *a_sink, RE::BSAnimationGraphEvent *a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent> *a_eventSource)
     {
-        if (!is_active || a_event->tag != "InteractEnd") 
+        if (!is_active) 
         { 
             // SKSE::log::info("Event {}", a_event->tag);
             return _ProcessEvent(a_sink, a_event, a_eventSource);
         }
+        if (a_event->tag == "TriggerActivate")
+        {
+            PlayerActivateHook::TriggerStored();
+        }
+        else if (a_event->tag == "IdleStop")
+        {
+            PlayerActivateHook::Reset();
+        }
+        else 
+        {
+            return _ProcessEvent(a_sink, a_event, a_eventSource);
+        }
         // SKSE::log::info("Event {}", a_event->tag);
-        PlayerActivateHook::TriggerStored();
         is_active.store(false);
         return _ProcessEvent(a_sink, a_event, a_eventSource);
     }

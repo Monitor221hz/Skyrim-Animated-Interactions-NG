@@ -50,6 +50,9 @@ public:
 		animation.LowThreshold = ini.GetDoubleValue("Animation", "TakeLowThreshold", -50.0);
 		camera.ForceThirdPerson = ini.GetBoolValue("Camera", "ForceThirdPerson", false); 
 		rotation.RotationSpeed = ini.GetDoubleValue("Rotation", "RotationSpeedMultiplier", 10.0f);
+
+
+		
 	
 	}
 	[[nodiscard]] bool GetAnimationBlockActivation() const { return animation.BlocksActivation; }	

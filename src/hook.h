@@ -66,7 +66,7 @@ namespace AnimatedInteractions
             delta_time_ptr = (float*)RELOCATION_ID(523660, 410199).address();
         }
         static void FaceObject(TESObjectREFR* refr);
-        static void QueueRotationZ(float strt_angle_z, float end_angle_z);
+        static void QueueRotationZ(float end_angle_z);
         static void QueueAnimationPostRotate(std::string a_name);
 
         
@@ -115,6 +115,8 @@ namespace AnimatedInteractions
 
         static inline Activation current_activation; 
         public:
+        static void Reset() { is_activating.store(false); }
+        static void SetActivationState(bool a_enable) { is_activating.store(a_enable); }
         static void TriggerStored();
         static void Install()
         {
@@ -124,10 +126,11 @@ namespace AnimatedInteractions
             //	p	TESObjectREFR__sub_1402A8E20+D3	call    TESObjectREFR__Activate_140296C00 19858 X 
             //	p	PlayerCharacter__sub_1405E3700+98	call    TESObjectREFR__Activate_140296C00 36496 X 
             //	p	Character__sub_140602410+1E6	call    TESObjectREFR__Activate_140296C00 36854 X (NPC interact) 
-            // Down	p	PlayerCharacter__sub_1406A9F90+135	call    TESObjectREFR__Activate_140296C00 39471
+            // SE: Down	p	PlayerCharacter__sub_1406A9F90+135	call    TESObjectREFR__Activate_140296C00 39471
+            // AE:	p	sub_1406D2750+10D	call    sub_1402A9180 40548 
             auto& trampoline = SKSE::GetTrampoline(); 
             SKSE::AllocTrampoline(14);
-            REL::Relocation<std::uintptr_t> target{ REL::RelocationID(39471, 0x0), REL::Relocate(0x135, 0x0)}; 
+            REL::Relocation<std::uintptr_t> target{ REL::RelocationID( 39471, 40548 ), REL::Relocate(0x135, 0x10D)}; 
             _ActivateRef = trampoline.write_call<5>(target.address(), ActivateRef);
 
             SKSE::log::info("Activate Hook installed");

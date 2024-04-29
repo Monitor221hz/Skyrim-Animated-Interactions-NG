@@ -41,8 +41,6 @@ namespace AnimatedInteractions
                     }
                 }
         }
-
-
     }
     void ConfigManager::LoadUserConfigs()
     {

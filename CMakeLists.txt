@@ -65,6 +65,7 @@ if(DEFINED OUTPUT_FOLDER)
     set(DLL_FOLDER "${OUTPUT_FOLDER}/SKSE/Plugins")
     set (CHAR_ANIMS_FOLDER "meshes/actors/character/animations")
     set (NEMESIS_FOLDER "Nemesis_Engine/mod/${MOD_CODE}")
+    set (CONFIG_FOLDER "Animated_Interactions")
 
     set(SRC_CONFIG_FOLDER "${CMAKE_SOURCE_DIR}/config")
     set(SRC_CHAR_ANIMS_FOLDER "${CMAKE_SOURCE_DIR}/${CHAR_ANIMS_FOLDER}")

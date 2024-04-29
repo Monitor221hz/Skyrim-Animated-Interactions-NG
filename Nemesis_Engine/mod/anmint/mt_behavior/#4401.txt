@@ -1,6 +1,6 @@
 		<hkobject name="#4401" class="hkbClipGenerator" signature="0x333b85b9">
 <!-- MOD_CODE ~anmint~ OPEN -->
-			<hkparam name="variableBindingSet">#anmint$68</hkparam>
+			<hkparam name="variableBindingSet">#anmint$112</hkparam>
 <!-- ORIGINAL -->
 			<hkparam name="variableBindingSet">null</hkparam>
 <!-- CLOSE -->

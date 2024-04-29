@@ -1,7 +1,7 @@
 		<hkobject name="#anmint$11" class="hkbStateMachine" signature="0x816c1dcb">
 			<hkparam name="variableBindingSet">null</hkparam>
 			<hkparam name="userData">0</hkparam>
-			<hkparam name="name">II_InteractionAnimations</hkparam>
+			<hkparam name="name">II_UseKneelState</hkparam>
 			<hkparam name="eventToSendWhenStateOrTransitionChanges">
 				<hkobject>
 					<hkparam name="id">-1</hkparam>
@@ -19,8 +19,8 @@
 			<hkparam name="maxSimultaneousTransitions">32</hkparam>
 			<hkparam name="startStateMode">START_STATE_MODE_DEFAULT</hkparam>
 			<hkparam name="selfTransitionMode">SELF_TRANSITION_MODE_NO_TRANSITION</hkparam>
-			<hkparam name="states" numelements="4">
-				#anmint$36 #anmint$29 #anmint$22 #anmint$17
+			<hkparam name="states" numelements="3">
+				#anmint$19 #anmint$15 #anmint$12
 			</hkparam>
-			<hkparam name="wildcardTransitions">#anmint$12</hkparam>
+			<hkparam name="wildcardTransitions">null</hkparam>
 		</hkobject>

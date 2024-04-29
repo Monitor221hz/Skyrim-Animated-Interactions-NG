@@ -1,9 +1,9 @@
 		<hkobject name="#anmint$30" class="hkbClipGenerator" signature="0x333b85b9">
-			<hkparam name="variableBindingSet">#anmint$32</hkparam>
+			<hkparam name="variableBindingSet">null</hkparam>
 			<hkparam name="userData">0</hkparam>
-			<hkparam name="name">II_TakeClip</hkparam>
-			<hkparam name="animationName">Animations\TakeItem.hkx</hkparam>
-			<hkparam name="triggers">#anmint$31</hkparam>
+			<hkparam name="name">II_UseChestLoop</hkparam>
+			<hkparam name="animationName">Animations\UseChestLoop.hkx</hkparam>
+			<hkparam name="triggers">null</hkparam>
 			<hkparam name="cropStartAmountLocalTime">0.000000</hkparam>
 			<hkparam name="cropEndAmountLocalTime">0.000000</hkparam>
 			<hkparam name="startTime">0.000000</hkparam>

@@ -14,7 +14,6 @@ namespace AnimatedInteractions
             return;
 
         auto dif = ref->GetPositionZ() - plyr->GetPositionZ() - 64.0;
-        auto* anim_plyr = AnimPlayer::GetSingleton();
 
         SKSE::log::info("Player Object Diff: {}", dif);
         if (dif > settings->GetHighTakeBound())
@@ -85,10 +84,13 @@ namespace AnimatedInteractions
              Config config; 
              
 
-             std::vector<BSGeometry*> geometries = NifUtil::Node::GetAllGeometries(ReferenceMesh); 
+             auto geometries = NifUtil::Node::GetAllGeometries(ReferenceMesh); 
              if (SelectedConfig != nullptr) node->local = SelectedConfig->transform; 
              for (auto* geom : geometries)
              {
+                // auto* geom = geom_ptr.get().get();
+                if (!geom) { continue; }
+
                 auto* clone = NifUtil::Node::Clone(geom);
                 
                 SKSE::log::info("Trishape Attached: {}", geom->name.c_str());

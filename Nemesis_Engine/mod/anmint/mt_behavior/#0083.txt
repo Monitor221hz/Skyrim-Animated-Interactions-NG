@@ -938,6 +938,12 @@
 				<hkcstring>TakeItemHigh</hkcstring>
 				<hkcstring>InteractEnd</hkcstring>
 				<hkcstring>TriggerActivate</hkcstring>
+				<hkcstring>InteractTransitionEnd</hkcstring>
+				<hkcstring>InteractLoopEnd</hkcstring>
+				<hkcstring>UseChain</hkcstring>
+				<hkcstring>Take2H</hkcstring>
+				<hkcstring>UseChest</hkcstring>
+				<hkcstring>UseKneel</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="attributeNames" numelements="0"></hkparam>

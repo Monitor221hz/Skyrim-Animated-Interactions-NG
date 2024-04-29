@@ -4,7 +4,7 @@
 			<hkparam name="name">ModifierGenerator35</hkparam>
 			<hkparam name="modifier">#0751</hkparam>
 <!-- MOD_CODE ~anmint~ OPEN -->
-			<hkparam name="generator">#anmint$57</hkparam>
+			<hkparam name="generator">#anmint$101</hkparam>
 <!-- ORIGINAL -->
 			<hkparam name="generator">#4397</hkparam>
 <!-- CLOSE -->

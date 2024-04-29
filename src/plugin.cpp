@@ -15,6 +15,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		AnimatedInteractions::PlayerUpdateHook::Load();
+		AnimPlayer::GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
 		ConfigManager::LoadAllConfigs();
 		break;
@@ -24,13 +25,13 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 		break;
 	case SKSE::MessagingInterface::kPostLoadGame:
 		TakeHandler::Load(); 
-		AnimPlayer::GetSingleton()->GetIdleRecords();
+		// AnimPlayer::GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
 		ConfigManager::LoadAllConfigs();
         break;
 	case SKSE::MessagingInterface::kNewGame:
 		TakeHandler::Load(); 
-		AnimPlayer::GetSingleton()->GetIdleRecords();
+		// AnimPlayer::GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
 		break;
 	}

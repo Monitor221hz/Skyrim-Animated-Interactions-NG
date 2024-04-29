@@ -403,42 +403,64 @@ namespace AnimUtil
 
 namespace FormUtil
 {
-    struct Form
+     struct Parse
     {
-            static RE::TESForm *GetFormFromMod(std::string modname, uint32_t formid)
+            static RE::TESForm *GetFormFromMod(uint32_t formid,std::string modname)
             {
             if (!modname.length() || !formid)
                 return nullptr;
             RE::TESDataHandler *dh = RE::TESDataHandler::GetSingleton();
-            RE::TESFile *modFile = nullptr;
-            for (auto it = dh->files.begin(); it != dh->files.end(); ++it)
-            {
-                RE::TESFile *f = *it;
-                if (strcmp(f->fileName, modname.c_str()) == 0)
-                {
-                    modFile = f;
-                    break;
-                }
-            }
-            if (!modFile)
-                return nullptr;
-            uint8_t modIndex = modFile->compileIndex;
-            uint32_t id = formid;
-            if (modIndex < 0xFE)
-            {
-                id |= ((uint32_t)modIndex) << 24;
-            }
-            else
-            {
-                uint16_t lightModIndex = modFile->smallFileCompileIndex;
-                if (lightModIndex != 0xFFFF)
-                {
-                    id |= 0xFE000000 | (uint32_t(lightModIndex) << 12);
-                }
-            }
-            return RE::TESForm::LookupByID(id);
+            return dh->LookupForm(formid, modname); 
+
             }
 
+            static RE::TESForm *GetFormFromMod(std::string modname, std::string formIDString)
+            {
+                if (formIDString.length() == 0) return nullptr; 
+
+                uint32_t formID = std::stoi(formIDString, 0, 16); 
+                return GetFormFromMod(formID,modname); 
+            } 
+
+            static RE::TESForm *GetFormFromConfigString(std::string str, std::string_view delimiter)
+            {
+                std::vector<std::string> splitData = Util::String::Split(str, delimiter); 
+                if (splitData.size() < 2) return nullptr;  
+                return GetFormFromMod(splitData[1], splitData[0]);
+            }
+            static RE::TESForm *GetFormFromConfigString(std::string str)
+            {
+                return GetFormFromConfigString(str, "~"sv); 
+            }
+            static RE::FormID GetFormIDFromMod(uint32_t relativeFormID, std::string modName)
+            {
+                auto *dataHandler = TESDataHandler::GetSingleton();
+
+                if (!dataHandler)
+                return -1;
+
+                return dataHandler->LookupFormID(relativeFormID, modName);
+            }
+
+            static RE::FormID GetFormIDFromMod(std::string relativeFormIDString, std::string modName)
+            {
+                if (relativeFormIDString.length() == 0) return -1; 
+
+
+                uint32_t relativeFormID = std::stoi(relativeFormIDString,  0, 16); 
+                return GetFormIDFromMod(relativeFormID, modName); 
+            }
+
+            static RE::FormID GetFormIDFromConfigString(std::string str, std::string_view delimiter)
+            {
+                std::vector<std::string> splitData = Util::String::Split(str, delimiter); 
+                if (splitData.size() < 2) return -1; 
+                return GetFormIDFromMod(splitData[0], splitData[1]);
+            }
+            static RE::FormID GetFormIDFromConfigString(std::string str)
+            {
+                return GetFormIDFromConfigString(str, "~"sv); 
+            }
 
     };
 }
@@ -469,17 +491,39 @@ namespace NifUtil
 				}
 			}
 
-            static std::vector<BSGeometry*> GetAllGeometries(RE::NiAVObject* root)
+            static std::vector<BSPointerHandle<BSGeometry>> GetAllGeometriesHandles(RE::NiAVObject* root)
             {
-                std::vector<BSGeometry*> geometries; 
+                // BSPointerHandle<BSGeometry> handles;
+                std::vector<BSPointerHandle<BSGeometry>> geometries; 
                 RE::BSVisit::TraverseScenegraphGeometries(root, [&](BSGeometry* geom)-> RE::BSVisit::BSVisitControl 
                 {
-                    geometries.emplace_back(geom); 
+                    if (!geom) { return RE::BSVisit::BSVisitControl::kContinue; }
+                    auto geom_handle = BSPointerHandle<BSGeometry>(geom);
+                    geometries.emplace_back(geom_handle);
                     return RE::BSVisit::BSVisitControl::kContinue;
                 }
 				); 
                 return geometries;
             }
+            static std::vector<BSGeometry*> GetAllGeometries(RE::NiAVObject* root)
+            {
+                std::vector<BSGeometry*> geometries; 
+                RE::BSVisit::TraverseScenegraphGeometries(root, [&](BSGeometry* geom)-> RE::BSVisit::BSVisitControl 
+                {
+                    if (geom) 
+                    { 
+                        geometries.emplace_back(geom); 
+                    }
+                    return RE::BSVisit::BSVisitControl::kContinue;
+                }
+				); 
+                return geometries;
+            }
+            // static std::vector<BSGeometry*> GetAllGeometriesSafe(RE::NiAVObject* root)
+            // {
+            //     std::vector<BSGeometry*> geometries; 
+
+            // }
 
 		};
     struct Armature

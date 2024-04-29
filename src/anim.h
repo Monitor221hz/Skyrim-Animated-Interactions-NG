@@ -11,12 +11,7 @@ namespace AnimatedInteractions
             
             AnimPlayer()
             {
-                State = true;
-            }
-            static AnimPlayer *GetSingleton()
-            {
-                static AnimPlayer singleton;
-                return &singleton;
+                // State = true;
             }
 
             static void TryForceThirdPerson()
@@ -30,7 +25,7 @@ namespace AnimatedInteractions
 
                 playerControls->data.povScriptMode = false; 
             }
-            bool BehaviorPatchInstalled()
+            static bool BehaviorPatchInstalled()
             {
                 bool bDummy;
                 RE::BSTSmartPointer<RE::BSAnimationGraphManager> animationGraphManagerPtr;
@@ -42,27 +37,38 @@ namespace AnimatedInteractions
 
                 return animationGraph->GetGraphVariableBool("II_PatchInstalled", bDummy);
             }
-            void GetIdleRecords()
+            static void GetIdleRecords()
             {
-                
-                std::string pluginName = "Animated Interactions.esp";
+                constexpr auto path = L"Data/SKSE/Plugins/Animated_Interactions/Forms.ini";
+
+                CSimpleIniA ini;
+                ini.SetUnicode();
+
+                ini.LoadFile(path);
+                auto forms_section = ini.GetSection("Idles");
+                WriteLocker locker(animLock);
+                for (auto &[key, entry] : *forms_section)
+                {
+                    AddIdleFormFromString(key.pItem, entry);
+                }
+                // std::string pluginName = "Animated Interactions.esp";
 
                 // IdleHandsBehindBack =  RE::TESForm::LookupByID<RE::TESIdleForm>(0x5902);
                 // IdleSearchChest =  RE::TESForm::LookupByID<RE::TESIdleForm>(0x5900);
                 // IdleSearchKneel = RE::TESForm::LookupByID<RE::TESIdleForm>(0x5903);
-                WriteLocker locker(animLock);
                 
-                idleMap.emplace("Exit", GetIdleForm(0x5901) );
-                idleMap.emplace("SearchKneel",GetIdleForm(0x5903));
-                idleMap.emplace("SearchChest",GetIdleForm(0x5900) );
+                
+                // idleMap.emplace("Exit", GetIdleForm(0x5901) );
+                // idleMap.emplace("SearchKneel",GetIdleForm(0x5903));
+                // idleMap.emplace("SearchChest",GetIdleForm(0x5900) );
                 // idleMap.emplace("PickUp", GetIdleForm(0xFB05));
                 // idleMap.emplace("PickUpLow", GetIdleForm(0xFB06));
 
-                idleMap["UseDoor"] = GetIdleForm(0x1EE0C);
-                idleMap["Take"] = GetIdleForm(0x1EE09);
+                // idleMap["UseDoor"] = GetIdleForm(0x1EE0C);
+                // idleMap["Take"] = GetIdleForm(0x1EE09);
 
-                idleMap["TakeHigh"] = GetIdleForm(0x1EE0B);
-                idleMap["TakeLow"] = GetIdleForm(0x1EE0A);
+                // idleMap["TakeHigh"] = GetIdleForm(0x1EE0B);
+                // idleMap["TakeLow"] = GetIdleForm(0x1EE0A);
 
                 if (BehaviorPatchInstalled())
                 {
@@ -72,60 +78,40 @@ namespace AnimatedInteractions
             }
         
 
-        void PlayAnimation(RE::Actor* actor, std::string idleName)
+        static bool PlayAnimation(RE::Actor* actor, std::string idleName)
         {   
             ReadLocker locker(animLock);
-            if (!State) return;
             // RE::PlayerCamera::GetSingleton()->ForceThirdPerson();
             TryForceThirdPerson();
             actor->SetGraphVariableFloat("II_AnimationSpeed", static_cast<float>(Settings::GetSingleton()->GetAnimationSpeed()));
-            if (!AnimUtil::Idle::Play(idleMap[idleName], actor, RE::DEFAULT_OBJECT::kActionIdle, nullptr))
+            bool result = AnimUtil::Idle::Play(idleMap[idleName], actor, RE::DEFAULT_OBJECT::kActionIdle, nullptr);
+            if (!result)
             {
                 SKSE::log::warn("PlayAnimation failed at: {} for actor: {}", idleName, actor->GetActorBase()->GetName());
             }
+            return result;
         }
 
-
-        void PlayAnimation(std::string idleName)
+        static bool PlayAnimation(std::string idleName)
         {
-            PlayAnimation(PlayerCharacter::GetSingleton(), idleName);
+            return PlayAnimation(PlayerCharacter::GetSingleton(), idleName);
         }
-
-        void PlayAnimationAndWait(RE::Actor* actor, std::string idleName)
-        {
-            PlayAnimation(idleName);
-            WriteLocker locker(animLock);
-            cv.wait_for(locker, std::chrono::milliseconds(250));
-            
-        }
-
-        void PlayAnimationAndWait(std::string idleName)
-        {
-            PlayAnimationAndWait(PlayerCharacter::GetSingleton(), idleName);
-        }
-
         
-        void ExitAnimation(RE::Actor* actor)
+        static void ExitAnimation(RE::Actor* actor)
         {
             PlayAnimation(actor, "Exit");
         }
         
 
-        void ApplyAnimationSpeed(RE::Actor *actor)
+        static void ApplyAnimationSpeed(RE::Actor *actor)
         {
             actor->SetGraphVariableFloat("II_AnimationSpeed", Settings::GetSingleton()->GetAnimationSpeed());
         }
-
-        void SetState(bool newState)
+        
+        static void AddIdleFormFromString(std::string name, std::string raw)
         {
-            WriteLocker locker(animLock);
-            State = newState;
-        }
-
-        bool GetState()
-        {
-            ReadLocker locker(animLock);
-            return State;
+            auto *idle = FormUtil::Parse::GetFormFromConfigString(raw)->As<RE::TESIdleForm>();
+            idleMap.emplace(name, idle);
         }
 
         private:
@@ -135,7 +121,6 @@ namespace AnimatedInteractions
             using WriteLocker = std::unique_lock<Lock>;
             std::condition_variable_any cv;
 
-            static inline bool State;
             
 
             static inline Lock animLock;
@@ -145,7 +130,7 @@ namespace AnimatedInteractions
             
             static RE::TESIdleForm* GetIdleForm(std::uint32_t formid)
             {
-                return FormUtil::Form::GetFormFromMod("Animated Interactions.esp", formid)->As<RE::TESIdleForm>();
+                return FormUtil::Parse::GetFormFromMod(formid,"Animated Interactions.esp")->As<RE::TESIdleForm>();
             }
             
     };
