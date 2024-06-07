@@ -43,15 +43,31 @@ namespace AnimatedInteractions
             auto* ref3D = refr->Get3D2();
             if (ref3D == ReferenceMesh) return;
             ReferenceMesh = refr->Get3D2();
-            
+            auto* ref = ReferenceMesh->GetUserData(); 
+            if (ref)
+            {
+                auto* base = ref->GetObjectReference();
+                if (base)
+                {
+                    auto* model = base->As<RE::TESModel>();
+                    SelectedConfig = ConfigManager::GetMeshConfigPtr(model->GetModel());
+                    SKSE::log::info("Reference mesh obtained");
+                    if (SelectedConfig == nullptr)
+                    {
+                        SKSE::log::info("Config for {} not found, using default alignment", model->GetModel());
+                        SelectedConfig = ConfigManager::GetFormConfigPtr(refr->GetBaseObject()->GetFormType());
+                        if (SelectedConfig == nullptr)
+                            SKSE::log::warn("Default alignment for {} not found", refr->GetBaseObject()->GetFormType());
+                    }
+                }
+            }
             refr->Load3D(true);
             SKSE::log::info("Reference mesh obtained");
         }
 
         NiNode* TakeHandler::GetAttachNode(NiAVObject* animObjectMesh)
         {
-            auto* root = animObjectMesh->AsFadeNode(); 
-            auto* userRef = root->GetUserData();            
+            auto* root = animObjectMesh->AsFadeNode();         
             NiNode* defaultAttachNode = root->GetObjectByName("Attach")->AsNode(); 
             return defaultAttachNode;
         }
@@ -85,7 +101,10 @@ namespace AnimatedInteractions
              
 
              auto geometries = NifUtil::Node::GetAllGeometries(ReferenceMesh); 
-             if (SelectedConfig != nullptr) node->local = SelectedConfig->transform; 
+             if (SelectedConfig != nullptr) 
+             {
+                node->local = SelectedConfig->transform; 
+             }
              for (auto* geom : geometries)
              {
                 // auto* geom = geom_ptr.get().get();

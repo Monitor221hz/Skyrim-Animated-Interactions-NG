@@ -307,30 +307,29 @@ namespace AnimatedInteractions
                 PlayerUpdateHook::QueueAnimationPostRotate("UseDoor");
                 break;
             case FormType::Container:
-                PlayerUpdateHook::QueueAnimationPostRotate("SearchChest");
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
                 break;
             case FormType::ActorCharacter:
-                PlayerUpdateHook::QueueAnimationPostRotate("SearchKneel");
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::Activator:
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::TalkingActivator:
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::NPC:
             {
-                auto* actor_ref = a_ref->As<RE::Actor>();
-                if (actor_ref->IsDead(true))
-                {
-                    PlayerUpdateHook::QueueAnimationPostRotate("UseKneel");
-                }
-                break;
+                // auto* actor_ref = a_ref->As<RE::Actor>();
+                // if (actor_ref->IsDead(true))
+                // {
+                //     PlayerUpdateHook::QueueAnimationPostRotate("UseKneel");
+                // }
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             }
             case FormType::Static:
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::MovableStatic:
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::Furniture:
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::PlacedHazard:
                 break;
             default:
