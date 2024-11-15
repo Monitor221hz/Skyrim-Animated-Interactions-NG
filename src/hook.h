@@ -31,6 +31,10 @@ namespace AnimatedInteractions
     {
         private:
         static void UpdatePlayer(RE::Actor *a_this, float a_delta);
+
+        static bool UpdateRootYaw(RE::Actor *a_this); 
+        static bool UpdateSpinePitch(RE::Actor *a_this); 
+
         static inline REL::Relocation<decltype(UpdatePlayer)> _UpdatePlayer;
 
         static inline float* delta_time_ptr = nullptr;
@@ -39,10 +43,18 @@ namespace AnimatedInteractions
         static inline float desired_angle_z = 0.0f; 
 
         static inline float last_angle_z = 0.0f; 
-        static inline float rotate_z_speed_mult = 1.0f;
+        static inline float yaw_speed_mult = 1.0f;
 
-        static inline std::atomic should_interp = false;
+        static inline float start_spine_pitch_z = 0.0f; 
+        static inline float desired_spine_pitch_z = 0.0f; 
+        static inline float spine_pitch_speed_mult = 10.0f; 
 
+        static inline float last_spine_pitch_z = 0.0f; 
+
+        static inline std::atomic should_interp_rotation = false;
+        static inline std::atomic should_interp_spine_pitch = false; 
+
+        static inline std::atomic spine_pitch_animation = false;
         static inline std::queue<std::string> animation_queue; 
 
         static void SetTurnState(Actor* a_actor, int turn_state);
@@ -66,9 +78,11 @@ namespace AnimatedInteractions
             delta_time_ptr = (float*)RELOCATION_ID(523660, 410199).address();
         }
         static void FaceObject(TESObjectREFR* refr);
-        static void QueueRotationZ(float end_angle_z);
-        static void QueueAnimationPostRotate(std::string a_name);
+        static void QueueRootYaw(float end_angle_z);
+        static void QueueAnimation(std::string a_name);
+        static void QueueSpinePitch(Actor* a_actor, float x_diff, float y_diff);
 
+        static void QueueAnimationPostRotateSpinePitch(std::string a_name, Actor* a_actor, float x_diff, float y_diff); 
         
         
 
@@ -115,8 +129,11 @@ namespace AnimatedInteractions
 
         static inline Activation current_activation; 
         public:
-        static void Reset() { is_activating.store(false); }
-        static void SetActivationState(bool a_enable) { is_activating.store(a_enable); }
+        static void Reset() 
+        { 
+            is_activating.store(false); 
+        }
+        static void SetActivationState(bool a_enable);
         static void TriggerStored();
         static void Install()
         {

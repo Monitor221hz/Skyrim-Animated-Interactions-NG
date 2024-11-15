@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.21)
 project(AnimatedInteractions VERSION 0.0.1 LANGUAGES CXX)
 
 # name of mod folder
-set (MOD_NAME "Animated Interactions SKSE")
+set (MOD_NAME "Animated Interactions NG")
 
 # only for nemesis based mods
 set (MOD_CODE "anmint")
@@ -34,7 +34,7 @@ endif()
 # To do this automatically, set the `SKYRIM_MODS_FOLDER` environment variable
 # to the path of your "mods" folder
 if(DEFINED ENV{SKYRIM_MODS_FOLDER} AND IS_DIRECTORY "$ENV{SKYRIM_MODS_FOLDER}")
-    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/${MOD_NAME}")
+    set(OUTPUT_FOLDER "$ENV{SKYRIM_MODS_FOLDER}/${MOD_NAME} ${CMAKE_BUILD_TYPE}")
 endif()
 
 # Otherwise, you can set OUTPUT_FOLDER to any place you'd like :)
@@ -64,12 +64,14 @@ if(DEFINED OUTPUT_FOLDER)
     # Copy the SKSE plugin .dll files into the SKSE/Plugins/ folder
     set(DLL_FOLDER "${OUTPUT_FOLDER}/SKSE/Plugins")
     set (CHAR_ANIMS_FOLDER "meshes/actors/character/animations")
+    set (ANIMOBJECT_MESH_FOLDER "meshes/animobjects/Animated_Interactions")
     set (NEMESIS_FOLDER "Nemesis_Engine/mod/${MOD_CODE}")
     set (CONFIG_FOLDER "Animated_Interactions")
 
     set(SRC_CONFIG_FOLDER "${CMAKE_SOURCE_DIR}/config")
     set(SRC_CHAR_ANIMS_FOLDER "${CMAKE_SOURCE_DIR}/${CHAR_ANIMS_FOLDER}")
-    set (SRC_NEMESIS_FOLDER "${CMAKE_SOURCE_DIR}/${NEMESIS_FOLDER}")
+    set(SRC_NEMESIS_FOLDER "${CMAKE_SOURCE_DIR}/${NEMESIS_FOLDER}")
+    set(SRC_ANIMOBJECT_MESH_FOLDER "${CMAKE_SOURCE_DIR}/${ANIMOBJECT_MESH_FOLDER}")
 
     message(STATUS "SKSE plugin output folder: ${DLL_FOLDER}")
 
@@ -94,6 +96,15 @@ if (EXISTS "${SRC_CHAR_ANIMS_FOLDER}")
         TARGET "${PROJECT_NAME}"
         POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/${CHAR_ANIMS_FOLDER}" "${OUTPUT_FOLDER}/${CHAR_ANIMS_FOLDER}"
+        VERBATIM
+    )
+endif()
+
+if (EXISTS "${SRC_ANIMOBJECT_MESH_FOLDER}")
+    add_custom_command(
+        TARGET "${PROJECT_NAME}"
+        POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different "${CMAKE_SOURCE_DIR}/${ANIMOBJECT_MESH_FOLDER}" "${OUTPUT_FOLDER}/${ANIMOBJECT_MESH_FOLDER}"
         VERBATIM
     )
 endif()

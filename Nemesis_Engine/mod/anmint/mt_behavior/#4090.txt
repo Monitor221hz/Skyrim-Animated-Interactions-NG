@@ -76,7 +76,7 @@
 				#4107
 				#4091
 <!-- MOD_CODE ~anmint~ OPEN -->
-				#anmint$92
+				#anmint$101
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="wildcardTransitions">null</hkparam>

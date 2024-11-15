@@ -43674,7 +43674,7 @@
 
 		<hkobject name="#103" class="hkbBehaviorGraphData" signature="0x95aca5d">
 			<hkobject name="attributeDefaults" numelements="0"></hkobject>
-			<hkparam name="variableInfos" numelements="232">
+			<hkparam name="variableInfos" numelements="233">
 				<hkobject>
 					<hkparam name="role">
 						<hkobject>
@@ -45763,6 +45763,15 @@
 					</hkparam>
 					<hkparam name="type">VARIABLE_TYPE_BOOL</hkparam>
 				</hkobject>
+				<hkobject>
+					<hkparam name="role">
+						<hkobject>
+							<hkparam name="role">ROLE_DEFAULT</hkparam>
+							<hkparam name="flags">0</hkparam>
+						</hkobject>
+					</hkparam>
+					<hkparam name="type">VARIABLE_TYPE_REAL</hkparam>
+				</hkobject>
 			</hkparam>
 			<hkparam name="characterPropertyInfos" numelements="15">
 				<hkobject>
@@ -45901,7 +45910,7 @@
 					<hkparam name="type">VARIABLE_TYPE_POINTER</hkparam>
 				</hkobject>
 			</hkparam>
-			<hkparam name="eventInfos" numelements="1221">
+			<hkparam name="eventInfos" numelements="1222">
 				<hkobject>
 					<hkparam name="flags">FLAG_SYNC_POINT</hkparam>
 				</hkobject>
@@ -47638,6 +47647,9 @@
 				</hkobject>
 				<hkobject>
 					<hkparam name="flags">FLAG_SYNC_POINT</hkparam>
+				</hkobject>
+				<hkobject>
+					<hkparam name="flags">0</hkparam>
 				</hkobject>
 				<hkobject>
 					<hkparam name="flags">0</hkparam>
@@ -49571,7 +49583,7 @@
 		</hkobject>
 
 		<hkobject name="#102" class="hkbVariableValueSet" signature="0x27812d8d">
-			<hkparam name="wordVariableValues" numelements="232">
+			<hkparam name="wordVariableValues" numelements="233">
 				<hkobject>
 					<hkparam name="value">0</hkparam>
 				</hkobject>
@@ -50268,6 +50280,9 @@
 				<hkobject>
 					<hkparam name="value">1</hkparam>
 				</hkobject>
+				<hkobject>
+					<hkparam name="value">0</hkparam>
+				</hkobject>
 			</hkparam>
 			<hkparam name="quadVariableValues" numelements="4">
 				(0.000000 0.000000 0.000000 0.000000)
@@ -50279,7 +50294,7 @@
 		</hkobject>
 
 		<hkobject name="#101" class="hkbBehaviorGraphStringData" signature="0xc713064e">
-			<hkparam name="eventNames" numelements="1221">
+			<hkparam name="eventNames" numelements="1222">
 				<hkcstring>FootLeft</hkcstring>
 				<hkcstring>FootRight</hkcstring>
 				<hkcstring>WeapEquip</hkcstring>
@@ -51501,9 +51516,10 @@
 				<hkcstring>TakeItem</hkcstring>
 				<hkcstring>TakeItemLow</hkcstring>
 				<hkcstring>TakeItemHigh</hkcstring>
+				<hkcstring>TakeItemCustom</hkcstring>
 			</hkparam>
 			<hkparam name="attributeNames" numelements="0"></hkparam>
-			<hkparam name="variableNames" numelements="232">
+			<hkparam name="variableNames" numelements="233">
 				<hkcstring>Speed</hkcstring>
 				<hkcstring>Direction</hkcstring>
 				<hkcstring>TurnDelta</hkcstring>
@@ -51736,6 +51752,7 @@
 				<hkcstring>iWantMountedWeaponAnims</hkcstring>
 				<hkcstring>II_AnimationSpeed</hkcstring>
 				<hkcstring>II_PatchInstalled</hkcstring>
+				<hkcstring>II_AnimationSpinePitch</hkcstring>
 			</hkparam>
 			<hkparam name="characterPropertyNames" numelements="15">
 				<hkcstring>ShieldOnly</hkcstring>

@@ -508,7 +508,7 @@ namespace NifUtil
             static std::vector<BSGeometry*> GetAllGeometries(RE::NiAVObject* root)
             {
                 std::vector<BSGeometry*> geometries; 
-                RE::BSVisit::TraverseScenegraphGeometries(root, [&](BSGeometry* geom)-> RE::BSVisit::BSVisitControl 
+                RE::BSVisit::TraverseScenegraphGeometries(root, [&geometries](BSGeometry* geom)-> RE::BSVisit::BSVisitControl 
                 {
                     if (geom) 
                     { 

@@ -944,6 +944,7 @@
 				<hkcstring>Take2H</hkcstring>
 				<hkcstring>UseChest</hkcstring>
 				<hkcstring>UseKneel</hkcstring>
+				<hkcstring>TakeItemCustom</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="attributeNames" numelements="0"></hkparam>
@@ -1018,6 +1019,7 @@
 <!-- MOD_CODE ~anmint~ OPEN -->
 				<hkcstring>II_AnimationSpeed</hkcstring>
 				<hkcstring>II_PatchInstalled</hkcstring>
+				<hkcstring>II_AnimationSpinePitch</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="characterPropertyNames" numelements="2">

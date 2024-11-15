@@ -1,3 +1,8 @@
-		<hkobject name="#anmint$86" class="hkbStringEventPayload" signature="0xed04256a">
-			<hkparam name="data">AnimObjectTakeLow</hkparam>
+		<hkobject name="#anmint$86" class="hkbStateMachineEventPropertyArray" signature="0xb07b4388">
+			<hkparam name="events" numelements="1">
+				<hkobject>
+					<hkparam name="id">165</hkparam>
+					<hkparam name="payload">null</hkparam>
+				</hkobject>
+			</hkparam>
 		</hkobject>

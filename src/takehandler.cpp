@@ -9,39 +9,42 @@ namespace AnimatedInteractions
         auto *plyr = RE::PlayerCharacter::GetSingleton();
         auto *settings = Settings::GetSingleton();
         plyr->GetGraphVariableBool("bForceIdleStop", idlePlaying);
-
-        if (idlePlaying)
+        auto* ref3d = ref->Get3D(); 
+        if (idlePlaying || ref3d == nullptr)
             return;
-
-        auto dif = ref->GetPositionZ() - plyr->GetPositionZ() - 64.0;
-
-        SKSE::log::info("Player Object Diff: {}", dif);
-        if (dif > settings->GetHighTakeBound())
-        {
-            PlayerUpdateHook::QueueAnimationPostRotate("TakeHigh");
-            // anim_plyr->PlayAnimation("TakeHigh");
-        }
-        else if (dif < settings->GetLowTakeBound())
-        {
-            PlayerUpdateHook::QueueAnimationPostRotate("TakeLow");
-            // anim_plyr->PlayAnimation("TakeLow");
-        }
-        else
-        {
-            PlayerUpdateHook::QueueAnimationPostRotate("Take");
-            // anim_plyr->PlayAnimation("Take");
-        }
+        float refZ = ref3d->world.translate.z; 
+        float y_diff = (float)(refZ - plyr->GetPositionZ() - 64.0f);
+        float x_diff = (float)(sqrt(pow(ref->GetPositionX() - plyr->GetPositionX(), 2) + pow(ref->GetPositionY() - plyr->GetPositionY(), 2)));
+        SKSE::log::info("Player Object Diff: {}", y_diff);
+        PlayerUpdateHook::QueueSpinePitch(plyr, x_diff, y_diff); 
+        PlayerUpdateHook::QueueAnimation("TakeCustom"); 
+        // if (y_diff > settings->GetHighTakeBound())
+        // {
+        //     PlayerUpdateHook::QueueAnimation("TakeHigh");
+        //     PlayerUpdateHook::QueueAnimationSpinePitch(x_diff, y_diff); 
+        //     // anim_plyr->PlayAnimation("TakeHigh");
+        // }
+        // else if (y_diff < settings->GetLowTakeBound())
+        // {
+        //     PlayerUpdateHook::QueueAnimation("TakeLow");
+        //     // anim_plyr->PlayAnimation("TakeLow");
+        // }
+        // else
+        // {
+        //     PlayerUpdateHook::QueueAnimation("Take");
+        //     // anim_plyr->PlayAnimation("Take");
+        // }
         
     }
     void TakeHandler::StoreReferenceMesh(TESObjectREFR *refr)
         {
-             WriteLocker locker(itemLock);
+            WriteLocker locker(itemLock);
             TakenObjectType = FormTypeToString(refr->GetBaseObject()->GetFormType());
             
             refr->Load3D(false);
 
             auto* ref3D = refr->Get3D2();
-            if (ref3D == ReferenceMesh) return;
+            if (ref3D == ReferenceMesh || ref3D == nullptr) return;
             ReferenceMesh = refr->Get3D2();
             auto* ref = ReferenceMesh->GetUserData(); 
             if (ref)
@@ -50,15 +53,20 @@ namespace AnimatedInteractions
                 if (base)
                 {
                     auto* model = base->As<RE::TESModel>();
-                    SelectedConfig = ConfigManager::GetMeshConfigPtr(model->GetModel());
-                    SKSE::log::info("Reference mesh obtained");
-                    if (SelectedConfig == nullptr)
+                    if (model != nullptr)
                     {
-                        SKSE::log::info("Config for {} not found, using default alignment", model->GetModel());
-                        SelectedConfig = ConfigManager::GetFormConfigPtr(refr->GetBaseObject()->GetFormType());
+                        SelectedConfig = ConfigManager::GetMeshConfigPtr(model->GetModel());
+
+                        SKSE::log::info("Reference mesh obtained");
                         if (SelectedConfig == nullptr)
-                            SKSE::log::warn("Default alignment for {} not found", refr->GetBaseObject()->GetFormType());
+                        {
+                            SKSE::log::info("Config for {} not found, using default alignment", model->GetModel());
+                            SelectedConfig = ConfigManager::GetFormConfigPtr(refr->GetBaseObject()->GetFormType());
+                            if (SelectedConfig == nullptr)
+                                SKSE::log::warn("Default alignment for {} not found", refr->GetBaseObject()->GetFormType());
+                        }
                     }
+
                 }
             }
             refr->Load3D(true);

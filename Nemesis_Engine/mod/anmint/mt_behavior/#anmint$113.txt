@@ -1,7 +1,7 @@
-		<hkobject name="#anmint$113" class="hkbModifierGenerator" signature="0x1f81fae6">
+		<hkobject name="#anmint$113" class="hkbBlenderGeneratorChild" signature="0xe2b384b0">
 			<hkparam name="variableBindingSet">null</hkparam>
-			<hkparam name="userData">1</hkparam>
-			<hkparam name="name">activateDoorBlendModifier</hkparam>
-			<hkparam name="modifier">#anmint$120</hkparam>
-			<hkparam name="generator">#anmint$114</hkparam>
+			<hkparam name="generator">#4397</hkparam>
+			<hkparam name="boneWeights">#anmint$114</hkparam>
+			<hkparam name="weight">1.000000</hkparam>
+			<hkparam name="worldFromModelWeight">1.000000</hkparam>
 		</hkobject>

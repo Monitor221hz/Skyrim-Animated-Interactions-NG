@@ -623,6 +623,15 @@
 					</hkparam>
 					<hkparam name="type">VARIABLE_TYPE_BOOL</hkparam>
 				</hkobject>
+				<hkobject>
+					<hkparam name="role">
+						<hkobject>
+							<hkparam name="role">ROLE_DEFAULT</hkparam>
+							<hkparam name="flags">0</hkparam>
+						</hkobject>
+					</hkparam>
+					<hkparam name="type">VARIABLE_TYPE_REAL</hkparam>
+				</hkobject>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="characterPropertyInfos" numelements="2">
@@ -3440,6 +3449,9 @@
 					<hkparam name="flags">0</hkparam>
 				</hkobject>
 <!-- MOD_CODE ~anmint~ OPEN -->
+				<hkobject>
+					<hkparam name="flags">0</hkparam>
+				</hkobject>
 				<hkobject>
 					<hkparam name="flags">0</hkparam>
 				</hkobject>

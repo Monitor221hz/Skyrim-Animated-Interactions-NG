@@ -27,7 +27,8 @@ public:
 
 	struct Rotation 
 	{
-		double RotationSpeed = 10.0;
+		double YawSpeed = 10.0;
+		double SpinePitchSpeed = 10.0; 
 	};
 
 	struct Camera
@@ -49,8 +50,8 @@ public:
 		animation.HighThreshold = ini.GetDoubleValue("Animation", "TakeHighThreshold", 50.0);
 		animation.LowThreshold = ini.GetDoubleValue("Animation", "TakeLowThreshold", -50.0);
 		camera.ForceThirdPerson = ini.GetBoolValue("Camera", "ForceThirdPerson", false); 
-		rotation.RotationSpeed = ini.GetDoubleValue("Rotation", "RotationSpeedMultiplier", 10.0f);
-
+		rotation.YawSpeed = ini.GetDoubleValue("Rotation", "YawSpeedMultiplier", 10.0f);
+		rotation.SpinePitchSpeed = ini.GetDoubleValue("Rotation", "SpinePitchSpeedMultiplier", 10.0f);
 
 		
 	
@@ -60,7 +61,8 @@ public:
 	[[nodiscard]] double GetHighTakeBound() const { return animation.HighThreshold; }
 	[[nodiscard]] double GetLowTakeBound() const { return animation.LowThreshold; }
 	[[nodiscard]] bool GetForceThirdPerson() const { return camera.ForceThirdPerson; }
-	[[nodiscard]] double GetRotationSpeed() const { return rotation.RotationSpeed; }
+	[[nodiscard]] double GetYawSpeed() const { return rotation.YawSpeed; }
+	[[nodiscard]] double GetSpinePitchSpeed() const { return rotation.SpinePitchSpeed; }
 	// [[nodiscard]] int GetCrosshairMode() const { return crosshair.mode; }
 
 

@@ -18,6 +18,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 		AnimPlayer::GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
 		ConfigManager::LoadAllConfigs();
+		TakeHandler::Load(); 
 		break;
 	case SKSE::MessagingInterface::kPostLoad:
 		break;
