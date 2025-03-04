@@ -16,24 +16,28 @@ namespace AnimatedInteractions
         float y_diff = (float)(refZ - plyr->GetPositionZ() - 64.0f);
         float x_diff = (float)(sqrt(pow(ref->GetPositionX() - plyr->GetPositionX(), 2) + pow(ref->GetPositionY() - plyr->GetPositionY(), 2)));
         SKSE::log::info("Player Object Diff: {}", y_diff);
+        if (Settings::GetSingleton()->GetLegacyTakeAnimation())
+        {
+            if (y_diff > settings->GetHighTakeBound())
+            {
+                PlayerUpdateHook::QueueAnimation("TakeHigh");
+                // anim_plyr->PlayAnimation("TakeHigh");
+            }
+            else if (y_diff < settings->GetLowTakeBound())
+            {
+                PlayerUpdateHook::QueueAnimation("TakeLow");
+                // anim_plyr->PlayAnimation("TakeLow");
+            }
+            else
+            {
+                PlayerUpdateHook::QueueAnimation("Take");
+                // anim_plyr->PlayAnimation("Take");
+            }
+            return;
+        }
         PlayerUpdateHook::QueueSpinePitch(plyr, x_diff, y_diff); 
         PlayerUpdateHook::QueueAnimation("TakeCustom"); 
-        // if (y_diff > settings->GetHighTakeBound())
-        // {
-        //     PlayerUpdateHook::QueueAnimation("TakeHigh");
-        //     PlayerUpdateHook::QueueAnimationSpinePitch(x_diff, y_diff); 
-        //     // anim_plyr->PlayAnimation("TakeHigh");
-        // }
-        // else if (y_diff < settings->GetLowTakeBound())
-        // {
-        //     PlayerUpdateHook::QueueAnimation("TakeLow");
-        //     // anim_plyr->PlayAnimation("TakeLow");
-        // }
-        // else
-        // {
-        //     PlayerUpdateHook::QueueAnimation("Take");
-        //     // anim_plyr->PlayAnimation("Take");
-        // }
+
         
     }
     void TakeHandler::StoreReferenceMesh(TESObjectREFR *refr)

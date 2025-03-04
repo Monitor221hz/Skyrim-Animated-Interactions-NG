@@ -198,14 +198,20 @@ namespace AnimatedInteractions
         a_player->SetRotationZ(player_angle);
         third_person_state->freeRotation.x = MathUtil::Angle::NormalRelativeAngle(camera_angle - angle_delta);
 
-        if ((round(player_angle*10.0f)/10.0f == round(desired_angle_z*10.0f)/10.0f || last_angle_z == player_angle))
+        if (round(player_angle*10.0f)/10.0f == round(desired_angle_z*10.0f)/10.0f)
         {
             SetTurnState(a_player, 1);
             should_interp_rotation.store(false);
             // SKSE::log::info("last_angle {} | player_angle {} | o_delta {}", MathUtil::Angle::RadianToDegree(last_angle_z), MathUtil::Angle::RadianToDegree(player_angle), o_delta);
             return true; 
         }
-
+        if (last_angle_z == player_angle)
+        {
+            SetTurnState(a_player, 1); 
+            should_interp_rotation.store(false); 
+            PlayerActivateHook::TriggerStored(); 
+            return true;
+        }
         last_angle_z = player_angle;
 
         if (angle_delta * angle_delta < FLT_EPSILON)
@@ -234,6 +240,8 @@ namespace AnimatedInteractions
         spine_pitch = spine_pitch + angle_delta; 
 
         auto spine_pitch_degrees = MathUtil::Angle::RadianToDegree(spine_pitch);
+
+        spine_pitch_degrees = MathUtil::Clamp(spine_pitch_degrees, spine_pitch_min_degrees, spine_pitch_max_degrees); 
         a_player->SetGraphVariableFloat("II_AnimationSpinePitch", spine_pitch_degrees); 
 
         if ((round(spine_pitch*10.f)/10.f == round(desired_spine_pitch_z*10.f)/10.f) || last_spine_pitch_z == spine_pitch)
@@ -337,7 +345,11 @@ namespace AnimatedInteractions
         a_actor->SetGraphVariableFloat("II_AnimationSpinePitch", 0.f); 
         SKSE::log::info("desired spine pitch: {}", MathUtil::Angle::RadianToDegree(desired_spine_pitch_z)); 
         should_interp_spine_pitch.store(true); 
-        spine_pitch_speed_mult = static_cast<float>(Settings::GetSingleton()->GetSpinePitchSpeed());
+        auto* settings = Settings::GetSingleton(); 
+        spine_pitch_speed_mult = static_cast<float>(settings->GetSpinePitchSpeed());
+
+        spine_pitch_min_degrees = static_cast<float>(settings->GetSpinePitchMin()); 
+        spine_pitch_max_degrees = static_cast<float>(settings->GetSpinePitchMax()); 
     }
     void PlayerUpdateHook::QueueAnimationPostRotateSpinePitch(std::string a_name, Actor *a_actor, float x_diff, float y_diff)
     {
@@ -398,6 +410,8 @@ namespace AnimatedInteractions
             case FormType::Furniture:
                 return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::PlacedHazard:
+                break;
+            case FormType::Flora:
                 break;
             default:
                 TakeHandler::StoreReferenceMesh(a_ref);

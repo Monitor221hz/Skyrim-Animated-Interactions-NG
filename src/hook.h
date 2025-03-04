@@ -48,6 +48,8 @@ namespace AnimatedInteractions
         static inline float start_spine_pitch_z = 0.0f; 
         static inline float desired_spine_pitch_z = 0.0f; 
         static inline float spine_pitch_speed_mult = 10.0f; 
+        static inline float spine_pitch_min_degrees = -30.f; 
+        static inline float spine_pitch_max_degrees = 30.f; 
 
         static inline float last_spine_pitch_z = 0.0f; 
 

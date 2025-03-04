@@ -19,6 +19,7 @@ public:
 	struct Animation
     {
 		bool BlocksActivation = false;
+		bool UseLegacyTake = false; 
         double AnimationSpeed = 1.0;
 		double HighThreshold = -35.0;
 		double LowThreshold = -115.0;
@@ -29,6 +30,9 @@ public:
 	{
 		double YawSpeed = 10.0;
 		double SpinePitchSpeed = 10.0; 
+
+		double SpinePitchMinDegrees = 10.0; 
+		double SpinePitchMaxDegrees = 10.0; 
 	};
 
 	struct Camera
@@ -45,6 +49,7 @@ public:
 		ini.SetUnicode();
 		
 		ini.LoadFile(path);
+		animation.UseLegacyTake = ini.GetBoolValue("Animation", "LegacyTakeAnimations", false); 
 		animation.BlocksActivation = ini.GetBoolValue("Animation", "AnimationBlocksActivate", false);
 		animation.AnimationSpeed= ini.GetDoubleValue("Animation", "AnimationSpeedMultiplier", 1.0);
 		animation.HighThreshold = ini.GetDoubleValue("Animation", "TakeHighThreshold", 50.0);
@@ -52,10 +57,11 @@ public:
 		camera.ForceThirdPerson = ini.GetBoolValue("Camera", "ForceThirdPerson", false); 
 		rotation.YawSpeed = ini.GetDoubleValue("Rotation", "YawSpeedMultiplier", 10.0f);
 		rotation.SpinePitchSpeed = ini.GetDoubleValue("Rotation", "SpinePitchSpeedMultiplier", 10.0f);
-
-		
+		rotation.SpinePitchMinDegrees = ini.GetDoubleValue("Rotation", "SpinePitchMinDegrees", -30.0f); 
+		rotation.SpinePitchMaxDegrees = ini.GetDoubleValue("Rotation", "SpinePitchMaxDegrees", 30.0f); 
 	
 	}
+	[[nodiscard]] bool GetLegacyTakeAnimation() const { return animation.UseLegacyTake; }
 	[[nodiscard]] bool GetAnimationBlockActivation() const { return animation.BlocksActivation; }	
     [[nodiscard]] double GetAnimationSpeed() const { return animation.AnimationSpeed; }
 	[[nodiscard]] double GetHighTakeBound() const { return animation.HighThreshold; }
@@ -63,6 +69,9 @@ public:
 	[[nodiscard]] bool GetForceThirdPerson() const { return camera.ForceThirdPerson; }
 	[[nodiscard]] double GetYawSpeed() const { return rotation.YawSpeed; }
 	[[nodiscard]] double GetSpinePitchSpeed() const { return rotation.SpinePitchSpeed; }
+	[[nodiscard]] double GetSpinePitchMin() const { return rotation.SpinePitchMinDegrees; }
+	[[nodiscard]] double GetSpinePitchMax() const { return rotation.SpinePitchMaxDegrees; }
+
 	// [[nodiscard]] int GetCrosshairMode() const { return crosshair.mode; }
 
 
