@@ -19,9 +19,9 @@ namespace AnimatedInteractions
 
         static void Load()
         {
-            usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x2E10F,"Animated Interactions.esp")->As<TESObjectANIO>());
-            usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x2E10E,"Animated Interactions.esp")->As<TESObjectANIO>());
-            usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x2E10D,"Animated Interactions.esp")->As<TESObjectANIO>());
+            usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x808,"Animated Interactions.esp")->As<TESObjectANIO>());
+            usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x809,"Animated Interactions.esp")->As<TESObjectANIO>());
+            usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x80A,"Animated Interactions.esp")->As<TESObjectANIO>());
         }
 
         static void HandlePickUp(RE::TESObjectREFR *ref);
