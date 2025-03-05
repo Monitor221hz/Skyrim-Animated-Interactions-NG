@@ -1,3 +1,12 @@
-		<hkobject name="#anmint$66" class="hkbStringEventPayload" signature="0xed04256a">
-			<hkparam name="data">AnimObjectTake</hkparam>
+		<hkobject name="#anmint$66" class="hkbStateMachineStateInfo" signature="0xed7f9d0">
+			<hkparam name="variableBindingSet">null</hkparam>
+			<hkparam name="listeners" numelements="0"></hkparam>
+			<hkparam name="enterNotifyEvents">#anmint$71</hkparam>
+			<hkparam name="exitNotifyEvents">#anmint$70</hkparam>
+			<hkparam name="transitions">null</hkparam>
+			<hkparam name="generator">#anmint$67</hkparam>
+			<hkparam name="name">TakeNormal</hkparam>
+			<hkparam name="stateId">0</hkparam>
+			<hkparam name="probability">1.000000</hkparam>
+			<hkparam name="enable">true</hkparam>
 		</hkobject>

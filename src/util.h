@@ -510,10 +510,11 @@ namespace NifUtil
                 std::vector<BSGeometry*> geometries; 
                 RE::BSVisit::TraverseScenegraphGeometries(root, [&geometries](BSGeometry* geom)-> RE::BSVisit::BSVisitControl 
                 {
-                    if (geom) 
+                    if (geom && geom->AsGeometry()) 
                     { 
                         geometries.emplace_back(geom); 
                     }
+                    
                     return RE::BSVisit::BSVisitControl::kContinue;
                 }
 				); 

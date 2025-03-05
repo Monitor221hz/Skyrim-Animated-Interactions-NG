@@ -110,6 +110,7 @@ namespace AnimatedInteractions
             SKSE::log::info("Hook: Button Input installed");
         }
     };
+
     class PlayerActivateHook
     {
         private:
@@ -127,6 +128,7 @@ namespace AnimatedInteractions
             Activation() {}
             Activation(TESObjectREFR* a_ref, TESObjectREFR* a_activate_trigger, uint8_t a_arg2, TESBoundObject* a_object, int32_t a_count, bool a_default_processing_only) :
             ref(a_ref), activate_trigger(a_activate_trigger), arg2(a_arg2), bound_object(a_object), count(a_count), default_processing_only(a_default_processing_only) {}
+            bool IsValid() { return ref != nullptr && activate_trigger != nullptr; }
         };
 
         static inline Activation current_activation; 
@@ -155,6 +157,17 @@ namespace AnimatedInteractions
             SKSE::log::info("Activate Hook installed");
         }
     };
+        class PlayerActivateHandleHook
+    {
+        static void Install()
+        {
+//	p	ActivateHandler__sub_140708BF0+1EF	call    PlayerCharacter__sub_1406A9F90
+        }
+
+
+        
+    }; 
+
     using EventResult = RE::BSEventNotifyControl;
     class PlayerGraphEventHook
     {

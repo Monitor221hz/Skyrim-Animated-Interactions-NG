@@ -1,8 +1,11 @@
-		<hkobject name="#anmint$94" class="hkbStateMachineEventPropertyArray" signature="0xb07b4388">
-			<hkparam name="events" numelements="1">
+		<hkobject name="#anmint$94" class="hkbVariableBindingSet" signature="0x338ad4ff">
+			<hkparam name="bindings" numelements="1">
 				<hkobject>
-					<hkparam name="id">393</hkparam>
-					<hkparam name="payload">#anmint$95</hkparam>
+					<hkparam name="memberPath">playbackSpeed</hkparam>
+					<hkparam name="variableIndex">$variableID[II_AnimationSpeed]$</hkparam>
+					<hkparam name="bitIndex">-1</hkparam>
+					<hkparam name="bindingType">BINDING_TYPE_VARIABLE</hkparam>
 				</hkobject>
 			</hkparam>
+			<hkparam name="indexOfBindingToEnable">-1</hkparam>
 		</hkobject>

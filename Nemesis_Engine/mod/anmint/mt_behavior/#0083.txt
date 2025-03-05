@@ -1020,6 +1020,7 @@
 				<hkcstring>II_AnimationSpeed</hkcstring>
 				<hkcstring>II_PatchInstalled</hkcstring>
 				<hkcstring>II_AnimationSpinePitch</hkcstring>
+				<hkcstring>bTakeCustomMirror</hkcstring>
 <!-- CLOSE -->
 			</hkparam>
 			<hkparam name="characterPropertyNames" numelements="2">

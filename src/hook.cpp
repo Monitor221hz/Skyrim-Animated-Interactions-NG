@@ -136,9 +136,10 @@ namespace AnimatedInteractions
             if (TakeHandler::IsReplaceable(animObject))
             {
 
-                
-                output = TakeHandler::GetMeshForTakenObject(output); 
-                 
+                if (auto* takenMesh = TakeHandler::GetMeshForTakenObject(output))
+                {
+                    output = takenMesh; 
+                }
                 // model->SetModel(TakeHandler::GetAnimObjectPath().c_str()); 
                 // SKSE::log::info("Animobject Path {}", TakeHandler::GetAnimObjectPath());
                 //  if (const auto swappedAnimObject = TakeHandler::GetLinkedAnimObject()) { model = swappedAnimObject; } 
@@ -370,15 +371,15 @@ namespace AnimatedInteractions
         // }
         if (is_activating)
         {
-            return Settings::GetSingleton()->GetAnimationBlockActivation() ? 
-            false : 
-            _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
-        }
+            if (Settings::GetSingleton()->GetAnimationBlockActivation()) { return false; }
+            return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+        } 
         if (!a_ref || !a_activate_trigger) 
         {
             return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
         }
-        current_activation = Activation(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+        
+        
         auto* base = a_ref->GetBaseObject();
         switch(base->GetFormType())
         {
@@ -387,7 +388,6 @@ namespace AnimatedInteractions
                 break;
             case FormType::Container:
                 return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
-                break;
             case FormType::ActorCharacter:
                 return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::Activator:
@@ -410,9 +410,9 @@ namespace AnimatedInteractions
             case FormType::Furniture:
                 return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::PlacedHazard:
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             case FormType::Flora:
-                break;
+                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
             default:
                 TakeHandler::StoreReferenceMesh(a_ref);
                 TakeHandler::HandlePickUp(a_ref);
@@ -420,6 +420,8 @@ namespace AnimatedInteractions
                 // current_activation = Activation();
                 // return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
         }
+        a_object = a_object == nullptr ? base : a_object; 
+        current_activation = Activation(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
         PlayerGraphEventHook::ActivateCallback();
         PlayerUpdateHook::FaceObject(a_ref);
         // AnimPlayer::GetSingleton()->PlayAnimation("")
@@ -435,13 +437,15 @@ namespace AnimatedInteractions
     }
     void PlayerActivateHook::TriggerStored()
     {
-        if (current_activation.ref == nullptr) 
+        if (!current_activation.IsValid() || current_activation.bound_object == nullptr) 
         { 
             return; 
         }
-        current_activation.ref->ActivateRef(current_activation.activate_trigger, current_activation.arg2, current_activation.bound_object, current_activation.count, current_activation.default_processing_only);
+        SKSE::log::info("Triggering stored! Ref Type: {}", current_activation.ref->GetBaseObject()->GetFormType()); 
+        // current_activation.ref->GetBaseObject()->Activate(current_activation.ref, current_activation.activate_trigger,current_activation.arg2, current_activation.bound_object, current_activation.count); crash
+        current_activation.ref->ActivateRef(current_activation.activate_trigger, current_activation.arg2, current_activation.bound_object, current_activation.count, current_activation.default_processing_only); 
         current_activation = Activation();
-        is_activating.store(false);
+        // is_activating.store(false);
     }
     void PlayerGraphEventHook::ActivateCallback()
     {
@@ -458,7 +462,12 @@ namespace AnimatedInteractions
         if (a_event->tag == "TriggerActivate")
         {
             PlayerActivateHook::TriggerStored();
-            is_active.store(false);
+            // is_active.store(false);
+        }
+        else if (a_event->tag == "InteractEnd")
+        {
+            PlayerActivateHook::SetActivationState(false); 
+            is_active.store(false); 
         }
         else if (a_event->tag == "IdleStop")
         {

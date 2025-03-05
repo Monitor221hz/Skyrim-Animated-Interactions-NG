@@ -48,9 +48,9 @@ namespace AnimatedInteractions
             refr->Load3D(false);
 
             auto* ref3D = refr->Get3D2();
-            if (ref3D == ReferenceMesh || ref3D == nullptr) return;
-            ReferenceMesh = refr->Get3D2();
-            auto* ref = ReferenceMesh->GetUserData(); 
+            if (ref3D == nullptr) return;
+            ReferenceMesh = std::unique_ptr<NiAVObject>(NifUtil::Node::Clone(ref3D));
+            auto* ref = ref3D->GetUserData(); 
             if (ref)
             {
                 auto* base = ref->GetObjectReference();
@@ -105,35 +105,41 @@ namespace AnimatedInteractions
             WriteLocker locker(itemLock);
             
             
-            if (ReferenceMesh == nullptr) SKSE::log::info("Null Extract"); 
-            
-             
-             auto* node = GetAttachNode(original);  
-             Config config; 
-             
+            if (ReferenceMesh == nullptr) 
+            {
+                return nullptr; 
+            }
 
-             auto geometries = NifUtil::Node::GetAllGeometries(ReferenceMesh); 
-             if (SelectedConfig != nullptr) 
-             {
-                node->local = SelectedConfig->transform; 
-             }
-             for (auto* geom : geometries)
-             {
+            auto *node = GetAttachNode(original);
+            Config config;
+
+            auto geometries = NifUtil::Node::GetAllGeometries(ReferenceMesh.get());
+            bool configPresent = SelectedConfig != nullptr;
+            //  if (configPresent)
+            //  {
+            //     node->local = SelectedConfig->transform;
+            //  }
+            for (auto *geom : geometries)
+            {
                 // auto* geom = geom_ptr.get().get();
                 if (!geom) { continue; }
 
                 auto* clone = NifUtil::Node::Clone(geom);
                 
                 SKSE::log::info("Trishape Attached: {}", geom->name.c_str());
+
+                if (configPresent)
+                {
+                    clone->local = SelectedConfig->transform; 
+                }
                 node->AttachChild(clone, true); 
              }
             // SKSE::log::info("Num children {}", root->GetChildren().size());
             //  auto *user = ReferenceMesh->GetUserData();
             //  if (user)
-            //     user->SetDelete(true);
-
-
-             return original->AsFadeNode();
+            //     user->SetDelete(true); 
+            ReferenceMesh = nullptr; 
+            return original->AsFadeNode();
         }
 
         bool TakeHandler::IsReplaceable(TESObjectANIO *animObject)

@@ -22,6 +22,7 @@ namespace AnimatedInteractions
             usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x808,"Animated Interactions.esp")->As<TESObjectANIO>());
             usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x809,"Animated Interactions.esp")->As<TESObjectANIO>());
             usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x80A,"Animated Interactions.esp")->As<TESObjectANIO>());
+            usedAnimObjects.emplace(FormUtil::Parse::GetFormFromMod(0x80B, "Animated Interactions.esp")->As<TESObjectANIO>()); 
         }
 
         static void HandlePickUp(RE::TESObjectREFR *ref);
@@ -40,7 +41,7 @@ namespace AnimatedInteractions
 
         static inline Lock itemLock;
 
-        static inline NiAVObject* ReferenceMesh; 
+        static inline std::unique_ptr<NiAVObject> ReferenceMesh; 
         static inline TESObjectREFR* Reference; 
         static inline Config* SelectedConfig; 
 
