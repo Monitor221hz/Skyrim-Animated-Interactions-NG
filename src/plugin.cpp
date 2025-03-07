@@ -14,6 +14,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
+		AnimatedInteractions::MenuOpenCloseEventHandler::Register(); 
 		AnimatedInteractions::PlayerUpdateHook::Load();
 		AnimPlayer::GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
@@ -29,11 +30,13 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 		// AnimPlayer::GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
 		ConfigManager::LoadAllConfigs();
+		AnimatedInteractions::PlayerActivateHook::Reset(); 
         break;
 	case SKSE::MessagingInterface::kNewGame:
 		TakeHandler::Load(); 
 		// AnimPlayer::GetIdleRecords();
 		Settings::GetSingleton()->LoadSettings();
+		AnimatedInteractions::PlayerActivateHook::Reset(); 
 		break;
 	}
 }

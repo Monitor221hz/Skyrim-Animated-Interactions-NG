@@ -115,8 +115,18 @@ namespace AnimatedInteractions
     {
         private:
         static bool ActivateRef(TESObjectREFR* a_ref, TESObjectREFR* a_activate_trigger, uint8_t a_arg2, TESBoundObject* a_object, int32_t a_count, bool a_defaultProcessingOnly);
-        static inline REL::Relocation<decltype(ActivateRef)> _ActivateRef; 
+        static inline REL::Relocation<decltype(ActivateRef)> _ActivateRef;
+        static void CrosshairActivate(Actor* a_actor);
+        static inline REL::Relocation<decltype(CrosshairActivate)> _CrosshairActivate;  
         static inline std::atomic is_activating{ false };
+        struct SimpleActivation
+        {
+            TESObjectREFR* ref = nullptr; 
+            Actor* actor = nullptr; 
+            SimpleActivation() {}
+            SimpleActivation(Actor* actor, TESObjectREFR* ref) : actor(actor), ref(ref){}
+            bool IsValid() { return ref && actor; }
+        };
         struct Activation
         {
             TESObjectREFR* ref = nullptr; 
@@ -132,13 +142,23 @@ namespace AnimatedInteractions
         };
 
         static inline Activation current_activation; 
+
+        static inline SimpleActivation current_simple_activation; 
+        static inline void ActivateFromCrosshair(Actor* a_actor)
+        {
+            using func_t = decltype(ActivateFromCrosshair); 
+            REL::Relocation<func_t> func { REL::RelocationID(39471, 40548)}; 
+            return func(a_actor); 
+        }
         public:
         static void Reset() 
         { 
             is_activating.store(false); 
         }
+        static const bool GetActivationState() { return is_activating; }
         static void SetActivationState(bool a_enable);
         static void TriggerStored();
+        static void TriggerStoredSimple(); 
         static void Install()
         {
             //	p	TESObjectREFR__Activate_140296C00+9D	call    TESObjectREFR__Activate_140296C00 X
@@ -149,24 +169,22 @@ namespace AnimatedInteractions
             //	p	Character__sub_140602410+1E6	call    TESObjectREFR__Activate_140296C00 36854 X (NPC interact) 
             // SE: Down	p	PlayerCharacter__sub_1406A9F90+135	call    TESObjectREFR__Activate_140296C00 39471
             // AE:	p	sub_1406D2750+10D	call    sub_1402A9180 40548 
+            
             auto& trampoline = SKSE::GetTrampoline(); 
-            SKSE::AllocTrampoline(14);
-            REL::Relocation<std::uintptr_t> target{ REL::RelocationID( 39471, 40548 ), REL::Relocate(0x135, 0x10D)}; 
-            _ActivateRef = trampoline.write_call<5>(target.address(), ActivateRef);
+            // SKSE::AllocTrampoline(14);
+            // REL::Relocation<std::uintptr_t> target{ REL::RelocationID( 39471, 40548 ), REL::Relocate(0x135, 0x10D)}; 
+            // _ActivateRef = trampoline.write_call<5>(target.address(), ActivateRef);
 
             SKSE::log::info("Activate Hook installed");
+
+            //Down	p	ActivateHandler__sub_140708BF0+1EF	call    PlayerCharacter__sub_1406A9F90
+            //Down	p	sub_140732C10+1D5	call    sub_1406D2750
+            SKSE::AllocTrampoline(14); 
+            REL::Relocation<std::uintptr_t> target2 { REL::RelocationID(41346,42420), REL::Relocate(0x1EF, 0x1D5) };
+            _CrosshairActivate = trampoline.write_call<5>(target2.address(), CrosshairActivate); 
         }
     };
-        class PlayerActivateHandleHook
-    {
-        static void Install()
-        {
-//	p	ActivateHandler__sub_140708BF0+1EF	call    PlayerCharacter__sub_1406A9F90
-        }
 
-
-        
-    }; 
 
     using EventResult = RE::BSEventNotifyControl;
     class PlayerGraphEventHook
@@ -179,13 +197,13 @@ namespace AnimatedInteractions
             SKSE::log::info("Hook Installed: Player Graph Event");
         }
 
-        static void ActivateCallback();
+
 
     private:
         static EventResult ProcessEvent(RE::BSTEventSink<RE::BSAnimationGraphEvent> *a_sink, RE::BSAnimationGraphEvent *a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent> *a_eventSource);
         static inline REL::Relocation<decltype(ProcessEvent)> _ProcessEvent;
 
-        static inline std::atomic is_active { false }; 
+
     };
     
     class AnimObjectHook

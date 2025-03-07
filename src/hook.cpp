@@ -341,7 +341,7 @@ namespace AnimatedInteractions
     void PlayerUpdateHook::QueueSpinePitch(Actor* a_actor, float x_diff, float y_diff)
     {
         auto scale = a_actor->GetScale(); 
-        desired_spine_pitch_z = y_diff < 0.f ? PI/2.f - acos(abs(y_diff) * scale/x_diff) : -PI/2.f + acos(abs(y_diff) * scale/x_diff); 
+        desired_spine_pitch_z = y_diff < 0.f ? PI/2.f - acos(MathUtil::Clamp(abs(y_diff) * scale/x_diff, -1.0, 1.0)) : -PI/2.f + acos(MathUtil::Clamp(abs(y_diff) * scale/x_diff, -1.0, 1.0)); 
         
         a_actor->SetGraphVariableFloat("II_AnimationSpinePitch", 0.f); 
         SKSE::log::info("desired spine pitch: {}", MathUtil::Angle::RadianToDegree(desired_spine_pitch_z)); 
@@ -361,77 +361,104 @@ namespace AnimatedInteractions
     }
     bool PlayerActivateHook::ActivateRef(TESObjectREFR *a_ref, TESObjectREFR *a_activate_trigger, uint8_t a_arg2, TESBoundObject *a_object, int32_t a_count, bool a_defaultProcessingOnly)
     {
-        // if (a_ref)
-        // {
-        //     SKSE::log::info("Ref {}", a_ref->GetName());
-        // }
-        // if (a_activate_trigger)
-        // {
-        //     SKSE::log::info("Trigger {}", a_activate_trigger->GetName());
-        // }
         if (is_activating)
         {
-            if (Settings::GetSingleton()->GetAnimationBlockActivation()) { return false; }
-            return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+            if (Settings::GetSingleton()->GetAnimationBlockActivation()) 
+            { 
+                return false; 
+            }
         } 
-        if (!a_ref || !a_activate_trigger) 
+        return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+    }
+    void PlayerActivateHook::CrosshairActivate(Actor *a_actor)
+    {
+        if (auto* camera = PlayerCamera::GetSingleton())
         {
-            return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+            if (!Settings::GetSingleton()->GetForceThirdPerson() && camera->IsInFirstPerson()) { return _CrosshairActivate(a_actor); }
         }
-        
-        
-        auto* base = a_ref->GetBaseObject();
+        if (auto* actor_state = a_actor->AsActorState())
+        {
+            if (actor_state->IsWeaponDrawn() || actor_state->actorState1.sitSleepState == SIT_SLEEP_STATE::kRidingMount)
+            {
+                return _CrosshairActivate(a_actor);
+            }
+        }
+        if (is_activating)
+        {
+            if (Settings::GetSingleton()->GetAnimationBlockActivation()) 
+            { 
+                return; 
+            }
+            return _CrosshairActivate(a_actor);
+        } 
+        auto ref = CrosshairPickData::GetSingleton()->target.get().get();
+
+        if (!ref || !a_actor) 
+        {
+            return _CrosshairActivate(a_actor); 
+        }
+        auto* base = ref->GetBaseObject(); 
+
         switch(base->GetFormType())
         {
             case FormType::Door:
                 PlayerUpdateHook::QueueAnimation("UseDoor");
                 break;
             case FormType::Container:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+            {
+                auto* ref_model = ref->Get3D(); 
+                if (!ref_model) { return  _CrosshairActivate(a_actor); }
+
+                ref_model->world.translate.z < a_actor->GetPositionZ() ? 
+                PlayerUpdateHook::QueueAnimation("SearchChest") : 
+                PlayerUpdateHook::QueueAnimation("UseDoor");
+                break;
+            }
             case FormType::ActorCharacter:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
             case FormType::Activator:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
             case FormType::TalkingActivator:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
             case FormType::NPC:
             {
-                // auto* actor_ref = a_ref->As<RE::Actor>();
-                // if (actor_ref->IsDead(true))
-                // {
-                //     PlayerUpdateHook::QueueAnimation("UseKneel");
-                // }
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                if (ref->IsDead())
+                {
+                    PlayerUpdateHook::QueueAnimation("SearchKneel"); 
+                    break;
+                }
+                return  _CrosshairActivate(a_actor);
             }
             case FormType::Static:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
             case FormType::MovableStatic:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
             case FormType::Furniture:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
             case FormType::PlacedHazard:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
+            case FormType::Ingredient:
+                return _CrosshairActivate(a_actor); 
             case FormType::Flora:
-                return  _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
+                return  _CrosshairActivate(a_actor);
+            case FormType::Tree:
+                return _CrosshairActivate(a_actor); 
             default:
-                TakeHandler::StoreReferenceMesh(a_ref);
-                TakeHandler::HandlePickUp(a_ref);
+                TakeHandler::StoreReferenceMesh(ref);
+                TakeHandler::HandlePickUp(ref);
                 // is_activating.store(true);
                 // current_activation = Activation();
                 // return _ActivateRef(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
         }
-        a_object = a_object == nullptr ? base : a_object; 
-        current_activation = Activation(a_ref, a_activate_trigger, a_arg2, a_object, a_count, a_defaultProcessingOnly);
-        PlayerGraphEventHook::ActivateCallback();
-        PlayerUpdateHook::FaceObject(a_ref);
-        // AnimPlayer::GetSingleton()->PlayAnimation("")
-        return true;
+        SetActivationState(true); 
+        current_simple_activation = SimpleActivation(a_actor, ref); 
+        PlayerUpdateHook::FaceObject(ref);
     }
     void PlayerActivateHook::SetActivationState(bool a_enable)
     {
         if (!a_enable)
         {
-            TriggerStored(); 
+            TriggerStoredSimple(); 
         }
         is_activating.store(a_enable);
     }
@@ -447,32 +474,38 @@ namespace AnimatedInteractions
         current_activation = Activation();
         // is_activating.store(false);
     }
-    void PlayerGraphEventHook::ActivateCallback()
+    void PlayerActivateHook::TriggerStoredSimple()
     {
-        is_active.store(true);
+        if (!current_simple_activation.IsValid()) { return; }
+        auto* pick_data = CrosshairPickData::GetSingleton();
+        TESObjectREFR *ref = current_simple_activation.ref;
+
+        pick_data->target = RE::ObjectRefHandle(ref);
+        ActivateFromCrosshair(current_simple_activation.actor);
+        current_simple_activation = SimpleActivation(); 
     }
+
     EventResult PlayerGraphEventHook::ProcessEvent(RE::BSTEventSink<RE::BSAnimationGraphEvent> *a_sink, RE::BSAnimationGraphEvent *a_event, RE::BSTEventSource<RE::BSAnimationGraphEvent> *a_eventSource)
     {
-        if (!is_active) 
+        if (!PlayerActivateHook::GetActivationState()) 
         { 
             // SKSE::log::info("Event {}", a_event->tag);
-            PlayerActivateHook::Reset();
             return _ProcessEvent(a_sink, a_event, a_eventSource);
         }
         if (a_event->tag == "TriggerActivate")
         {
-            PlayerActivateHook::TriggerStored();
+            // PlayerActivateHook::TriggerStored();
+            PlayerActivateHook::TriggerStoredSimple(); 
+
             // is_active.store(false);
         }
         else if (a_event->tag == "InteractEnd")
         {
-            PlayerActivateHook::SetActivationState(false); 
-            is_active.store(false); 
+            PlayerActivateHook::Reset();
         }
         else if (a_event->tag == "IdleStop")
         {
             PlayerActivateHook::Reset();
-            is_active.store(false);
         }
         else 
         {
@@ -482,4 +515,5 @@ namespace AnimatedInteractions
         
         return _ProcessEvent(a_sink, a_event, a_eventSource);
     }
+
 }
