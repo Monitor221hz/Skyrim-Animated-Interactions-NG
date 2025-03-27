@@ -18,10 +18,13 @@ namespace AnimatedInteractions
             {
                 if (!Settings::GetSingleton()->GetForceThirdPerson()) return; 
                 auto playerControls = PlayerControls::GetSingleton(); 
+                auto* camera = PlayerCamera::GetSingleton(); 
+                if (!camera) 
+                { 
+                    return; 
+                }
                 playerControls->data.povScriptMode = true; 
-                using func_t = decltype(&TryForceThirdPerson);
-                REL::Relocation<func_t> func{REL::RelocationID(54948, 55565)};
-                func();
+                camera->ForceThirdPerson(); 
 
                 playerControls->data.povScriptMode = false; 
             }

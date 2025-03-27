@@ -402,17 +402,19 @@ namespace AnimatedInteractions
         switch(base->GetFormType())
         {
             case FormType::Door:
+                if (!Settings::GetSingleton()->GetDoorAnimation()) { return  _CrosshairActivate(a_actor); }
                 PlayerUpdateHook::QueueAnimation("UseDoor");
-                break;
+                return  _CrosshairActivate(a_actor);
             case FormType::Container:
             {
+                if (!Settings::GetSingleton()->GetContainerAnimation()) { return  _CrosshairActivate(a_actor); }
                 auto* ref_model = ref->Get3D(); 
                 if (!ref_model) { return  _CrosshairActivate(a_actor); }
 
                 ref_model->world.translate.z < a_actor->GetPositionZ() ? 
                 PlayerUpdateHook::QueueAnimation("SearchChest") : 
                 PlayerUpdateHook::QueueAnimation("UseDoor");
-                break;
+                return  _CrosshairActivate(a_actor);
             }
             case FormType::ActorCharacter:
                 return  _CrosshairActivate(a_actor);

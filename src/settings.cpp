@@ -20,6 +20,8 @@ public:
     {
 		bool BlocksActivation = false;
 		bool UseLegacyTake = false; 
+		bool DoorAnimation = false; 
+		bool ContainerAnimation = true; 
         double AnimationSpeed = 1.0;
 		double HighThreshold = -35.0;
 		double LowThreshold = -115.0;
@@ -51,6 +53,8 @@ public:
 		ini.LoadFile(path);
 		animation.UseLegacyTake = ini.GetBoolValue("Animation", "LegacyTakeAnimations", false); 
 		animation.BlocksActivation = ini.GetBoolValue("Animation", "AnimationBlocksActivate", false);
+		animation.DoorAnimation = ini.GetBoolValue("Animation", "DoorAnimation", false); 
+		animation.ContainerAnimation = ini.GetBoolValue("Animation", "ContainerAnimation", false); 
 		animation.AnimationSpeed= ini.GetDoubleValue("Animation", "AnimationSpeedMultiplier", 1.0);
 		animation.HighThreshold = ini.GetDoubleValue("Animation", "TakeHighThreshold", 50.0);
 		animation.LowThreshold = ini.GetDoubleValue("Animation", "TakeLowThreshold", -50.0);
@@ -71,6 +75,9 @@ public:
 	[[nodiscard]] double GetSpinePitchSpeed() const { return rotation.SpinePitchSpeed; }
 	[[nodiscard]] double GetSpinePitchMin() const { return rotation.SpinePitchMinDegrees; }
 	[[nodiscard]] double GetSpinePitchMax() const { return rotation.SpinePitchMaxDegrees; }
+	[[nodiscard]] bool GetDoorAnimation() const { return animation.DoorAnimation; }
+	[[nodiscard]] bool GetContainerAnimation() const { return animation.ContainerAnimation; }
+	
 
 	// [[nodiscard]] int GetCrosshairMode() const { return crosshair.mode; }
 
