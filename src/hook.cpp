@@ -439,8 +439,6 @@ namespace AnimatedInteractions
                 return  _CrosshairActivate(a_actor);
             case FormType::PlacedHazard:
                 return  _CrosshairActivate(a_actor);
-            case FormType::Ingredient:
-                return _CrosshairActivate(a_actor); 
             case FormType::Flora:
                 return  _CrosshairActivate(a_actor);
             case FormType::Tree:
